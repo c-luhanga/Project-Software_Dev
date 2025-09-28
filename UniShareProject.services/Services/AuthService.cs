@@ -1,27 +1,34 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using UniShareProject.Repository.Data;
 using UniShareProject.Repository.Models;
 using UniShareProject.Repository.Repositories;
 using UniShareProject.services.DTOs;
-using System.Globalization;
 
 namespace UniShareProject.services.Services;
+
+public class JwtSettings
+{
+    public string Key { get; set; } = string.Empty;
+    public string Issuer { get; set; } = string.Empty;
+    public string Audience { get; set; } = string.Empty;
+    public int ExpiresMinutes { get; set; } = 60;
+}
 
 public class AuthService : IAuthService
 {
     private readonly IUserRepository _userRepository;
-    private readonly IDbConnectionFactory _connectionFactory;
-    private readonly IConfiguration _configuration;
+    private readonly IUnitOfWorkFactory _unitOfWorkFactory;
+    private readonly JwtSettings _jwt;
 
-    public AuthService(IUserRepository userRepository, IDbConnectionFactory connectionFactory, IConfiguration configuration)
+    public AuthService(IUserRepository userRepository, IUnitOfWorkFactory unitOfWorkFactory, IOptions<JwtSettings> jwtOptions)
     {
         _userRepository = userRepository;
-        _connectionFactory = connectionFactory;
-        _configuration = configuration;
+        _unitOfWorkFactory = unitOfWorkFactory;
+        _jwt = jwtOptions.Value;
     }
 
     public async Task<int> RegisterAsync(RegisterRequest req, CancellationToken ct)
@@ -32,8 +39,10 @@ public class AuthService : IAuthService
             throw new InvalidOperationException("Only @principia.edu email addresses are allowed");
         }
 
+        await using var uow = _unitOfWorkFactory.Create();
+
         // Check if email already exists
-        if (await _userRepository.EmailExistsAsync(req.Email, ct))
+        if (await _userRepository.EmailExistsAsync(req.Email, uow, ct))
         {
             throw new InvalidOperationException("User with this email already exists");
         }
@@ -55,46 +64,38 @@ public class AuthService : IAuthService
         };
 
         // Insert user and get new UserId
-        await using var unitOfWork = new UnitOfWork(_connectionFactory);
         try
         {
-            var userId = await _userRepository.InsertAsync(user, ct);
-            await unitOfWork.CommitAsync();
+            var userId = await _userRepository.InsertAsync(user, uow, ct);
+            await uow.CommitAsync();
             return userId;
         }
         catch
         {
-            await unitOfWork.RollbackAsync();
+            await uow.RollbackAsync();
             throw;
         }
     }
 
     public async Task<LoginResponse> LoginAsync(LoginRequest req, CancellationToken ct)
     {
+        await using var uow = _unitOfWorkFactory.Create();
+
         // Fetch user by email
-        var user = await _userRepository.GetByEmailAsync(req.Email, ct);
-        
+        var user = await _userRepository.GetByEmailAsync(req.Email, uow, ct);
         if (user == null)
-        {
             throw new UnauthorizedAccessException("Invalid email or password");
-        }
 
         // Verify password with BCrypt
         if (!BCrypt.Net.BCrypt.Verify(req.Password, user.PasswordHash))
-        {
             throw new UnauthorizedAccessException("Invalid email or password");
-        }
 
         // Ensure user is not banned or deleted
         if (user.IsBanned)
-        {
             throw new UnauthorizedAccessException("Account has been banned");
-        }
 
         if (user.IsDeleted)
-        {
             throw new UnauthorizedAccessException("Account has been deleted");
-        }
 
         // Generate JWT token
         var token = GenerateJwtToken(user);
@@ -110,14 +111,8 @@ public class AuthService : IAuthService
 
     private string GenerateJwtToken(User user)
     {
-        var jwtSettings = _configuration.GetSection("Jwt");
-        var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]!);
-        var issuer = jwtSettings["Issuer"];
-        var audience = jwtSettings["Audience"];
-        var expiresMinutes = int.Parse(jwtSettings["ExpiresMinutes"]!);
+        var key = Encoding.UTF8.GetBytes(_jwt.Key);
 
-        var tokenHandler = new JwtSecurityTokenHandler();
-        
         // Create claims
         var claims = new List<Claim>
         {
@@ -126,24 +121,20 @@ public class AuthService : IAuthService
             new(JwtRegisteredClaimNames.Email, user.Email),
             new("role", user.IsAdmin ? "admin" : "user"),
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new(JwtRegisteredClaimNames.Iat, 
-                new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds().ToString(), 
-                ClaimValueTypes.Integer64)
+            new(JwtRegisteredClaimNames.Iat, new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64)
         };
 
         var tokenDescriptor = new SecurityTokenDescriptor
         {
             Subject = new ClaimsIdentity(claims),
-            Expires = DateTime.UtcNow.AddMinutes(expiresMinutes),
-            SigningCredentials = new SigningCredentials(
-                new SymmetricSecurityKey(key), 
-                SecurityAlgorithms.HmacSha256Signature
-            ),
-            Issuer = issuer,
-            Audience = audience
+            Expires = DateTime.UtcNow.AddMinutes(_jwt.ExpiresMinutes),
+            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
+            Issuer = _jwt.Issuer,
+            Audience = _jwt.Audience
         };
 
-        var token = tokenHandler.CreateToken(tokenDescriptor);
-        return tokenHandler.WriteToken(token);
+        var handler = new JwtSecurityTokenHandler();
+        var token = handler.CreateToken(tokenDescriptor);
+        return handler.WriteToken(token);
     }
 }

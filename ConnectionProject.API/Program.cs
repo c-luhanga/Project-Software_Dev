@@ -6,8 +6,11 @@ using UniShareProject.Repository.Repositories;
 using UniShareProject.services.Services;
 using FluentValidation.AspNetCore;
 using FluentValidation;
+using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
 
 // Add services to the container.
 builder.Services.AddControllers();
@@ -22,7 +25,8 @@ builder.Services.AddAutoMapper(typeof(Program));
 
 // Database and Data Access
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")!;
-builder.Services.AddSingleton<IDbConnectionFactory>(provider => new SqlConnectionFactory(connectionString));
+builder.Services.AddSingleton<IDbConnectionFactory>(_ => new SqlConnectionFactory(connectionString));
+builder.Services.AddScoped<IUnitOfWorkFactory, UnitOfWorkFactory>();
 
 // Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -36,8 +40,8 @@ builder.Services.AddScoped<IItemService, ItemService>();
 builder.Services.AddScoped<IMessagingService, MessagingService>();
 
 // JWT Authentication
-var jwtSettings = builder.Configuration.GetSection("Jwt");
-var key = Encoding.ASCII.GetBytes(jwtSettings["Key"]!);
+var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>()!;
+var key = Encoding.ASCII.GetBytes(jwtSettings.Key);
 
 builder.Services.AddAuthentication(options =>
 {
@@ -53,9 +57,9 @@ builder.Services.AddAuthentication(options =>
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = new SymmetricSecurityKey(key),
         ValidateIssuer = true,
-        ValidIssuer = jwtSettings["Issuer"],
+        ValidIssuer = jwtSettings.Issuer,
         ValidateAudience = true,
-        ValidAudience = jwtSettings["Audience"],
+        ValidAudience = jwtSettings.Audience,
         ValidateLifetime = true,
         ClockSkew = TimeSpan.Zero
     };

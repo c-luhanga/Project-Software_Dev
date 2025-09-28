@@ -8,34 +8,33 @@ public class MessagingService : IMessagingService
 {
     private readonly IConversationRepository _conversationRepository;
     private readonly IMessageRepository _messageRepository;
-    private readonly IDbConnectionFactory _connectionFactory;
+    private readonly IUnitOfWorkFactory _unitOfWorkFactory;
 
     public MessagingService(
         IConversationRepository conversationRepository,
         IMessageRepository messageRepository,
-        IDbConnectionFactory connectionFactory)
+        IUnitOfWorkFactory unitOfWorkFactory)
     {
         _conversationRepository = conversationRepository;
         _messageRepository = messageRepository;
-        _connectionFactory = connectionFactory;
+        _unitOfWorkFactory = unitOfWorkFactory;
     }
 
     public async Task<Conversation?> GetConversationByIdAsync(int id)
     {
-        await using var unitOfWork = new UnitOfWork(_connectionFactory);
+        await using var unitOfWork = _unitOfWorkFactory.Create();
         return await _conversationRepository.GetByIdAsync(id, unitOfWork);
     }
 
     public async Task<IEnumerable<Conversation>> GetUserConversationsAsync(int userId)
     {
-        await using var unitOfWork = new UnitOfWork(_connectionFactory);
+        await using var unitOfWork = _unitOfWorkFactory.Create();
         return await _conversationRepository.GetByUserIdAsync(userId, unitOfWork);
     }
 
     public async Task<Conversation> CreateConversationAsync(int itemId, int buyerId, int sellerId)
     {
-        await using var unitOfWork = new UnitOfWork(_connectionFactory);
-
+        await using var unitOfWork = _unitOfWorkFactory.Create();
         var conversation = new Conversation
         {
             ItemId = itemId,
@@ -45,7 +44,6 @@ public class MessagingService : IMessagingService
             UpdatedAt = DateTime.UtcNow,
             IsActive = true
         };
-
         try
         {
             conversation.Id = await _conversationRepository.CreateAsync(conversation, unitOfWork);
@@ -61,14 +59,13 @@ public class MessagingService : IMessagingService
 
     public async Task<IEnumerable<Message>> GetConversationMessagesAsync(int conversationId)
     {
-        await using var unitOfWork = new UnitOfWork(_connectionFactory);
+        await using var unitOfWork = _unitOfWorkFactory.Create();
         return await _messageRepository.GetByConversationIdAsync(conversationId, unitOfWork);
     }
 
     public async Task<Message> SendMessageAsync(int conversationId, int senderId, string content)
     {
-        await using var unitOfWork = new UnitOfWork(_connectionFactory);
-
+        await using var unitOfWork = _unitOfWorkFactory.Create();
         var message = new Message
         {
             ConversationId = conversationId,
@@ -77,7 +74,6 @@ public class MessagingService : IMessagingService
             CreatedAt = DateTime.UtcNow,
             IsRead = false
         };
-
         try
         {
             message.Id = await _messageRepository.CreateAsync(message, unitOfWork);
@@ -93,14 +89,12 @@ public class MessagingService : IMessagingService
 
     public async Task<bool> MarkMessageAsReadAsync(int messageId)
     {
-        await using var unitOfWork = new UnitOfWork(_connectionFactory);
-
+        await using var unitOfWork = _unitOfWorkFactory.Create();
         try
         {
             var message = await _messageRepository.GetByIdAsync(messageId, unitOfWork);
             if (message == null)
                 return false;
-
             message.IsRead = true;
             var success = await _messageRepository.UpdateAsync(message, unitOfWork);
             await unitOfWork.CommitAsync();

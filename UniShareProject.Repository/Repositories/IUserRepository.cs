@@ -5,10 +5,10 @@ namespace UniShareProject.Repository.Repositories;
 
 public interface IUserRepository
 {
-    // Auth helper methods (new requirements)
-    Task<bool> EmailExistsAsync(string email, CancellationToken ct);
-    Task<int> InsertAsync(User u, CancellationToken ct);
-    Task<User?> GetByEmailAsync(string email, CancellationToken ct);
+    // Auth helper methods (now require unit of work)
+    Task<bool> EmailExistsAsync(string email, IUnitOfWork unitOfWork, CancellationToken ct);
+    Task<int> InsertAsync(User u, IUnitOfWork unitOfWork, CancellationToken ct);
+    Task<User?> GetByEmailAsync(string email, IUnitOfWork unitOfWork, CancellationToken ct);
     
     // Legacy methods for backward compatibility with existing services
     Task<User?> GetByIdAsync(int id, IUnitOfWork unitOfWork);
