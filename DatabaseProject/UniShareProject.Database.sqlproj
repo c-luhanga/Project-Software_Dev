@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <Name>DatabaseProject</Name>
+    <Name>UniShareProject.Database</Name>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectVersion>4.1</ProjectVersion>
     <ProjectGuid>{06c7a40b-bf0a-4b8e-9a3f-7a641fb4e931}</ProjectGuid>
@@ -63,10 +63,14 @@
   </ItemGroup>
   <ItemGroup>
     <Build Include="dbo\Tables\Users.sql" />
+    <Build Include="dbo\Tables\Messages.sql" />
+    <Build Include="dbo\Tables\MessageReads.sql" />
+    <Build Include="dbo\Tables\ItemStatusTypes.sql" />
     <Build Include="dbo\Tables\Items.sql" />
     <Build Include="dbo\Tables\ItemImages.sql" />
     <Build Include="dbo\Tables\Conversations.sql" />
     <Build Include="dbo\Tables\ConversationParticipants.sql" />
-    <Build Include="dbo\Tables\Messages.sql" />
+    <Build Include="dbo\Tables\ConditionTypes.sql" />
+    <Build Include="dbo\Tables\Categories.sql" />
   </ItemGroup>
 </Project>

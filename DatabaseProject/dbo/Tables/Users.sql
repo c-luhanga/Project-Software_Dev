@@ -9,10 +9,26 @@
     [House]           NVARCHAR (50)  NULL,
     [IsBanned]        BIT            DEFAULT ((0)) NOT NULL,
     [IsAdmin]         BIT            DEFAULT ((0)) NOT NULL,
+    [IsDeleted]       BIT            DEFAULT ((0)) NOT NULL,
     [CreatedAt]       DATETIME       DEFAULT (getdate()) NOT NULL,
     [LastSeen]        DATETIME       NULL,
     [ProfileImageURL] NVARCHAR (500) NULL,
     PRIMARY KEY CLUSTERED ([UserID] ASC),
-    UNIQUE NONCLUSTERED ([Email] ASC)
+    CONSTRAINT [CK_Users_Email_Principia] CHECK (right(lower([Email]),len('@principia.edu'))='@principia.edu')
 );
+
+
+GO
+CREATE NONCLUSTERED INDEX [IX_Users_Email]
+    ON [dbo].[Users]([Email] ASC);
+
+
+GO
+CREATE UNIQUE NONCLUSTERED INDEX [UQ_Users_Email_Active]
+    ON [dbo].[Users]([Email] ASC) WHERE ([IsDeleted]=(0));
+
+
+GO
+CREATE NONCLUSTERED INDEX [IX_Users_LastSeen]
+    ON [dbo].[Users]([LastSeen] ASC);
 

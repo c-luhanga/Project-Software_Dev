@@ -1,0 +1,87 @@
+@Host = https://localhost:7050
+
+### 1. Reset database (Development only)
+POST {{Host}}/api/v1/admin/reset-database
+Content-Type: application/json
+
+###
+
+### 2. Login with seeded user (Alice) - Save token for next requests
+POST {{Host}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "alice@principia.edu",
+  "password": "dummyhash"
+}
+
+### 3. Login with seeded user (Bob)
+POST {{Host}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "bob@principia.edu",
+  "password": "dummyhash"
+}
+
+### 4. Test /me endpoint with valid token (replace {{$bearerToken}} with actual token from login response)
+GET {{Host}}/api/v1/me
+Authorization: Bearer {{$bearerToken}}
+
+### 5. Register a new user
+POST {{Host}}/api/v1/auth/register
+Content-Type: application/json
+
+{
+  "firstName": "Test",
+  "lastName": "User2",
+  "email": "test2@principia.edu",
+  "password": "dummyhash"
+}
+
+### 6. Login with the newly registered user
+POST {{Host}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "test2@principia.edu",
+  "password": "dummyhash"
+}
+
+### 7. Test login with wrong password (should fail)
+POST {{Host}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "alice@principia.edu",
+  "password": "wrongpassword"
+}
+
+### 8. Test login with non-existent user (should fail)
+POST {{Host}}/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "nonexistent@principia.edu",
+  "password": "anypassword"
+}
+
+### 9. Test /items endpoint (replace {{$bearerToken}} with a valid token)
+GET {{Host}}/api/v1/items
+Authorization: Bearer {{$bearerToken}}
+
+###
+
+### 10. (Optional) Refresh token (if implemented)
+POST {{Host}}/api/v1/auth/refresh
+Authorization: Bearer {{$bearerToken}}
+
+###
+
+@q=string
+@house=string
+### 11. (Admin) Get users (replace {{$bearerToken}} with an admin token)
+GET {{Host}}/api/v1/admin/users?q={{q}}&house={{house}}
+Authorization: Bearer {{$bearerToken}}
+
+###

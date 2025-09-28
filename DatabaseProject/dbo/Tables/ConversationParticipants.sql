@@ -8,6 +8,11 @@
 
 
 GO
+CREATE NONCLUSTERED INDEX [IX_ConvPart_User_Conv]
+    ON [dbo].[ConversationParticipants]([UserID] ASC, [ConversationID] ASC);
+
+
+GO
 CREATE NONCLUSTERED INDEX [IX_ConversationParticipants_UserID]
     ON [dbo].[ConversationParticipants]([UserID] ASC);
 

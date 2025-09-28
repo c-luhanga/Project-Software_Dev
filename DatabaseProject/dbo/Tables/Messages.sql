@@ -11,11 +11,11 @@
 
 
 GO
-CREATE NONCLUSTERED INDEX [IX_Messages_Conversation_Time]
-    ON [dbo].[Messages]([ConversationID] ASC, [Timestamp] DESC);
+CREATE NONCLUSTERED INDEX [IX_Messages_SenderID_Time]
+    ON [dbo].[Messages]([SenderID] ASC, [Timestamp] DESC);
 
 
 GO
-CREATE NONCLUSTERED INDEX [IX_Messages_SenderID_Time]
-    ON [dbo].[Messages]([SenderID] ASC, [Timestamp] DESC);
+CREATE NONCLUSTERED INDEX [IX_Messages_Conversation_Time]
+    ON [dbo].[Messages]([ConversationID] ASC, [Timestamp] DESC);
 

@@ -6,3 +6,8 @@
     CONSTRAINT [FK_ItemImages_Items] FOREIGN KEY ([ItemID]) REFERENCES [dbo].[Items] ([ItemID]) ON DELETE CASCADE
 );
 
+
+GO
+CREATE NONCLUSTERED INDEX [IX_ItemImages_ItemID]
+    ON [dbo].[ItemImages]([ItemID] ASC);
+
