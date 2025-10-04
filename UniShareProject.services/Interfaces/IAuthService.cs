@@ -1,6 +1,6 @@
 using UniShareProject.services.DTOs;
 
-namespace UniShareProject.services.Services;
+namespace UniShareProject.services.Interfaces;
 
 public interface IAuthService
 {

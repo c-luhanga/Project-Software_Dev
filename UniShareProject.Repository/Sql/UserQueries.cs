@@ -1,0 +1,74 @@
+namespace UniShareProject.Repository.Sql;
+
+/// <summary>
+/// Contains all SQL queries for User repository operations
+/// </summary>
+public static class UserQueries
+{
+    #region Insert Operations
+    
+    /// <summary>
+    /// Inserts a new user and returns the generated ID
+    /// </summary>
+    public const string Insert = @"
+        INSERT INTO dbo.Users 
+        (FirebaseUID, FirstName, LastName, Email, PasswordHash, Phone, House, IsBanned, IsAdmin, IsDeleted, CreatedAt, LastSeen, ProfileImageURL)
+        VALUES 
+        (@FirebaseUID, @FirstName, @LastName, @Email, @PasswordHash, @Phone, @House, @IsBanned, @IsAdmin, @IsDeleted, @CreatedAt, @LastSeen, @ProfileImageURL);
+        SELECT CAST(SCOPE_IDENTITY() as int)";
+
+    #endregion
+
+    #region Select Operations
+
+    /// <summary>
+    /// Checks if an email exists in the database
+    /// </summary>
+    public const string EmailExists = @"
+        SELECT COUNT(1) FROM dbo.Users WHERE Email = @Email";
+
+    /// <summary>
+    /// Gets a user by email (active users only)
+    /// </summary>
+    public const string GetByEmail = @"
+        SELECT * FROM dbo.Users WHERE Email = @Email AND IsDeleted = 0";
+
+    /// <summary>
+    /// Gets a user by ID (active users only)
+    /// </summary>
+    public const string GetById = @"
+        SELECT * FROM dbo.Users WHERE UserID = @Id AND IsDeleted = 0";
+
+    /// <summary>
+    /// Gets a user by username/email (for backward compatibility)
+    /// </summary>
+    public const string GetByUsername = @"
+        SELECT * FROM dbo.Users WHERE Email = @Username AND IsDeleted = 0";
+
+    /// <summary>
+    /// Gets all active users
+    /// </summary>
+    public const string GetAll = @"
+        SELECT * FROM dbo.Users WHERE IsDeleted = 0";
+
+    #endregion
+
+    #region Update Operations
+
+    /// <summary>
+    /// Updates user information
+    /// </summary>
+    public const string Update = @"
+        UPDATE dbo.Users 
+        SET FirstName = @FirstName, LastName = @LastName, Email = @Email, 
+            Phone = @Phone, House = @House, LastSeen = @LastSeen, ProfileImageURL = @ProfileImageURL
+        WHERE UserID = @UserID AND IsDeleted = 0";
+
+    /// <summary>
+    /// Soft delete by setting IsDeleted to 1
+    /// </summary>
+    public const string SoftDelete = @"
+        UPDATE dbo.Users SET IsDeleted = 1 WHERE UserID = @Id";
+
+    #endregion
+}

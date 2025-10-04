@@ -1,6 +1,6 @@
-using UniShareProject.Repository.Data;
+using UniShareProject.Repository.Data.Interfaces;
 
-namespace UniShareProject.Repository.Data;
+namespace UniShareProject.Repository.Data.Implementation;
 
 public class UnitOfWorkFactory : IUnitOfWorkFactory
 {

@@ -1,17 +1,6 @@
 using UniShareProject.Repository.Models;
 
-namespace UniShareProject.services.Services;
-
-public interface IItemService
-{
-    Task<Item?> GetByIdAsync(int id);
-    Task<IEnumerable<Item>> GetAllAsync();
-    Task<IEnumerable<Item>> GetByUserIdAsync(int userId);
-    Task<IEnumerable<Item>> SearchAsync(string query);
-    Task<Item> CreateAsync(Item item);
-    Task<Item> UpdateAsync(Item item);
-    Task<bool> DeleteAsync(int id);
-}
+namespace UniShareProject.services.Interfaces;
 
 public interface IMessagingService
 {

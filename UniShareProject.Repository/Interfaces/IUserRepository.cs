@@ -1,4 +1,4 @@
-using UniShareProject.Repository.Data;
+using UniShareProject.Repository.Data.Interfaces;
 using UniShareProject.Repository.Models;
 
 namespace UniShareProject.Repository.Repositories;

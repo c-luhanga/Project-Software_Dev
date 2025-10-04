@@ -1,4 +1,4 @@
-namespace UniShareProject.Repository.Data;
+namespace UniShareProject.Repository.Data.Interfaces;
 
 public interface IUnitOfWorkFactory
 {

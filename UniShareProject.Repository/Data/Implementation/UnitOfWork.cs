@@ -1,7 +1,8 @@
 using System.Data;
 using Microsoft.Data.SqlClient;
+using UniShareProject.Repository.Data.Interfaces;
 
-namespace UniShareProject.Repository.Data;
+namespace UniShareProject.Repository.Data.Implementation;
 
 public class UnitOfWork : IUnitOfWork
 {

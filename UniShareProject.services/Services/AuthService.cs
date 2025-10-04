@@ -3,20 +3,14 @@ using System.Security.Claims;
 using System.Text;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
-using UniShareProject.Repository.Data;
+using UniShareProject.Repository.Data.Interfaces;
 using UniShareProject.Repository.Models;
 using UniShareProject.Repository.Repositories;
 using UniShareProject.services.DTOs;
+using UniShareProject.services.Interfaces;
+using UniShareProject.services.Settings;
 
 namespace UniShareProject.services.Services;
-
-public class JwtSettings
-{
-    public string Key { get; set; } = string.Empty;
-    public string Issuer { get; set; } = string.Empty;
-    public string Audience { get; set; } = string.Empty;
-    public int ExpiresMinutes { get; set; } = 60;
-}
 
 public class AuthService : IAuthService
 {
@@ -113,13 +107,17 @@ public class AuthService : IAuthService
     {
         var key = Encoding.UTF8.GetBytes(_jwt.Key);
 
-        // Create claims
+        // Create claims - Adding ClaimTypes.NameIdentifier for compatibility
         var claims = new List<Claim>
         {
             new(JwtRegisteredClaimNames.Sub, user.UserId.ToString()),
+            new(ClaimTypes.NameIdentifier, user.UserId.ToString()), // Add this for better compatibility
             new(JwtRegisteredClaimNames.Name, $"{user.FirstName} {user.LastName}".Trim()),
+            new(ClaimTypes.Name, $"{user.FirstName} {user.LastName}".Trim()), // Add this for compatibility
             new(JwtRegisteredClaimNames.Email, user.Email),
+            new(ClaimTypes.Email, user.Email), // Add this for compatibility
             new("role", user.IsAdmin ? "admin" : "user"),
+            new(ClaimTypes.Role, user.IsAdmin ? "admin" : "user"), // Add this for compatibility
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new(JwtRegisteredClaimNames.Iat, new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64)
         };

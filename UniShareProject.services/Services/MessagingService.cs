@@ -1,6 +1,7 @@
-using UniShareProject.Repository.Data;
+using UniShareProject.Repository.Data.Interfaces;
 using UniShareProject.Repository.Models;
 using UniShareProject.Repository.Repositories;
+using UniShareProject.services.Interfaces;
 
 namespace UniShareProject.services.Services;
 
