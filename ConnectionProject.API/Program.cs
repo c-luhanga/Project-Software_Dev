@@ -34,6 +34,38 @@ builder.Services.Configure<DatabaseSettings>(options =>
     options.DefaultConnection = builder.Configuration.GetConnectionString("DefaultConnection") ?? string.Empty;
 });
 
+// Add CORS services
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("UniSharePolicy", policy =>
+    {
+        policy.WithOrigins(
+                "http://localhost:3000",     // React development server
+                "http://localhost:3001",     // Alternative React port
+                "http://localhost:4200",     // Angular development server
+                "http://localhost:5173",     // Vite development server
+                "http://localhost:8080",     // Vue.js development server
+                "https://localhost:3000",    // HTTPS versions
+                "https://localhost:3001",
+                "https://localhost:4200",
+                "https://localhost:5173",
+                "https://localhost:8080"
+            )
+            .AllowAnyMethod()                    // Allow GET, POST, PUT, DELETE, etc.
+            .AllowAnyHeader()                    // Allow any request headers
+            .AllowCredentials()                  // Allow cookies/credentials
+            .WithExposedHeaders("Authorization", "Content-Disposition"); // Expose specific headers to client
+    });
+
+    // Alternative: More permissive policy for development (use carefully)
+    options.AddPolicy("DevelopmentPolicy", policy =>
+    {
+        policy.AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+    });
+});
+
 // Add services to the container.
 builder.Services.AddControllers();
 
@@ -299,6 +331,9 @@ app.UseHttpsRedirection();
 
 // Add exception handling middleware early in the pipeline
 app.UseMiddleware<ExceptionHandlingMiddleware>();
+
+// Enable CORS - Must be placed after UseRouting() if using it, but before UseAuthentication()
+app.UseCors(app.Environment.IsDevelopment() ? "DevelopmentPolicy" : "UniSharePolicy");
 
 app.UseAuthentication();
 
