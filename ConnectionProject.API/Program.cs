@@ -106,7 +106,7 @@ builder.Services.AddScoped<IConversationRepository, ConversationRepository>();
 builder.Services.AddScoped<IMessageRepository, MessageRepository>();
 
 // Services - Updated to use the new IAuthService interface and ItemService from Implementations
-builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IAuthService, UniShareProject.services.Implementations.AuthService>();
 builder.Services.AddScoped<IItemService, UniShareProject.services.Implementations.ItemService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IMessagingService, MessagingService>();

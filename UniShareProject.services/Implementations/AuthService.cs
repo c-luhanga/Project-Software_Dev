@@ -10,7 +10,7 @@ using UniShareProject.services.DTOs;
 using UniShareProject.services.Interfaces;
 using UniShareProject.services.Settings;
 
-namespace UniShareProject.services.Services;
+namespace UniShareProject.services.Implementations;
 
 public class AuthService : IAuthService
 {
@@ -107,17 +107,23 @@ public class AuthService : IAuthService
     {
         var key = Encoding.UTF8.GetBytes(_jwt.Key);
 
-        // Create claims - Adding ClaimTypes.NameIdentifier for compatibility
+        // Create claims with proper mapping to Program.cs configuration
         var claims = new List<Claim>
         {
+            // Required claims
             new(JwtRegisteredClaimNames.Sub, user.UserId.ToString()),
-            new(ClaimTypes.NameIdentifier, user.UserId.ToString()), // Add this for better compatibility
             new(JwtRegisteredClaimNames.Name, $"{user.FirstName} {user.LastName}".Trim()),
-            new(ClaimTypes.Name, $"{user.FirstName} {user.LastName}".Trim()), // Add this for compatibility
             new(JwtRegisteredClaimNames.Email, user.Email),
-            new(ClaimTypes.Email, user.Email), // Add this for compatibility
-            new("role", user.IsAdmin ? "admin" : "user"),
-            new(ClaimTypes.Role, user.IsAdmin ? "admin" : "user"), // Add this for compatibility
+            
+            // Role claim - matches Program.cs RoleClaimType = ClaimTypes.Role
+            new(ClaimTypes.Role, user.IsAdmin ? "admin" : "user"),
+            
+            // Additional compatibility claims for better framework support
+            new(ClaimTypes.NameIdentifier, user.UserId.ToString()),
+            new(ClaimTypes.Name, $"{user.FirstName} {user.LastName}".Trim()),
+            new(ClaimTypes.Email, user.Email),
+            
+            // Additional standard JWT claims
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new(JwtRegisteredClaimNames.Iat, new DateTimeOffset(DateTime.UtcNow).ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64)
         };
