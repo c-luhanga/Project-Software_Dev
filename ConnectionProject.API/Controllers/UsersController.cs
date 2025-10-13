@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using UniShareProject.services.DTOs;
 using UniShareProject.services.Interfaces;
+using System.Security.Claims;
 
 namespace ConnectionProject.API.Controllers;
 
@@ -51,7 +52,7 @@ public class UsersController : ControllerBase
     {
         try
         {
-            var userId = int.Parse(User.FindFirst("sub")!.Value);
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var user = await _service.GetMeAsync(userId, ct);
             return user is null ? NotFound(new { message = "User not found" }) : Ok(user);
         }
@@ -108,7 +109,7 @@ public class UsersController : ControllerBase
 
         try
         {
-            var userId = int.Parse(User.FindFirst("sub")!.Value);
+            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
             var user = await _service.UpdateMeAsync(userId, req, ct);
             return Ok(user);
         }
