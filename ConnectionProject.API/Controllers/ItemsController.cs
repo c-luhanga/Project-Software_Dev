@@ -26,7 +26,7 @@ public class ItemsController : ControllerBase
     /// Create a new item for sale
     /// </summary>
     /// <remarks>
-    /// Create a new item listing in the marketplace. Requires authentication.
+    /// Create a new item listing in the marketplace. Requires authentication with @principia.edu email.
     /// 
     /// Sample request:
     /// 
@@ -51,12 +51,14 @@ public class ItemsController : ControllerBase
     /// <response code="201">Item successfully created</response>
     /// <response code="400">Invalid request data or validation errors</response>
     /// <response code="401">Authentication required</response>
+    /// <response code="403">Must use @principia.edu email</response>
     /// <response code="500">Internal server error</response>
     [HttpPost]
-    [Authorize] // Explicitly require authentication
+    [Authorize(Policy = "PrincipiaEmail")]
     [ProducesResponseType(typeof(ItemDto), 201)]
     [ProducesResponseType(typeof(object), 400)]
     [ProducesResponseType(typeof(object), 401)]
+    [ProducesResponseType(typeof(object), 403)]
     [ProducesResponseType(typeof(object), 500)]
     public async Task<IActionResult> CreateItem([FromBody] CreateItemRequest request, CancellationToken ct)
     {
@@ -221,7 +223,7 @@ public class ItemsController : ControllerBase
     /// Update item status (Admin/Seller operation)
     /// </summary>
     /// <remarks>
-    /// Update the status of an item. Requires authentication.
+    /// Update the status of an item. Requires authentication and authorization (item owner or admin).
     /// 
     /// Status values:
     /// - 1: Active (available for purchase)
@@ -229,10 +231,8 @@ public class ItemsController : ControllerBase
     /// - 3: Sold (transaction completed)
     /// - 4: Withdrawn (removed from sale)
     /// 
-    /// This endpoint is primarily for administrative purposes or seller management.
+    /// This endpoint is restricted to item owners and administrators.
     /// Regular users should use the specific action endpoints like /request-purchase.
-    /// 
-    /// Future enhancement: Add authorization to restrict to item owner or admins.
     /// </remarks>
     /// <param name="id">Item ID</param>
     /// <param name="statusId">New status ID (1=Active, 2=Pending, 3=Sold, 4=Withdrawn)</param>
@@ -245,7 +245,8 @@ public class ItemsController : ControllerBase
     /// <response code="404">Item not found</response>
     /// <response code="500">Internal server error</response>
     [HttpPatch("{id:int}/status")]
-    [Authorize] // Explicitly require authentication
+    [Authorize]
+    [Authorize(Policy = "ItemOwnerOrAdmin")]
     [ProducesResponseType(typeof(ItemDto), 200)]
     [ProducesResponseType(typeof(object), 400)]
     [ProducesResponseType(typeof(object), 401)]
@@ -276,10 +277,10 @@ public class ItemsController : ControllerBase
     /// Add images to an existing item
     /// </summary>
     /// <remarks>
-    /// Add 1-4 image URLs to an existing item. Requires authentication and ownership of the item.
+    /// Add 1-4 image URLs to an existing item. Requires authentication and authorization (item owner or admin).
     /// 
     /// This action:
-    /// - Validates that the authenticated user is the seller of the item
+    /// - Validates that the authenticated user is the seller of the item or an admin
     /// - Ensures the total number of images (existing + new) does not exceed 4
     /// - Adds the provided image URLs to the item
     /// - Returns all image URLs for the item after adding
@@ -304,12 +305,13 @@ public class ItemsController : ControllerBase
     /// <response code="200">Images added successfully</response>
     /// <response code="400">Invalid request data or validation errors</response>
     /// <response code="401">Authentication required</response>
-    /// <response code="403">Not authorized to add images to this item (not the seller)</response>
+    /// <response code="403">Not authorized to add images to this item</response>
     /// <response code="404">Item not found</response>
     /// <response code="409">Would exceed maximum of 4 images per item</response>
     /// <response code="500">Internal server error</response>
     [HttpPost("{id:int}/images")]
     [Authorize]
+    [Authorize(Policy = "ItemOwnerOrAdmin")]
     [ProducesResponseType(typeof(IReadOnlyList<string>), 200)]
     [ProducesResponseType(typeof(object), 400)]
     [ProducesResponseType(typeof(object), 401)]
@@ -346,10 +348,10 @@ public class ItemsController : ControllerBase
     /// Mark an item as sold
     /// </summary>
     /// <remarks>
-    /// Mark a pending item as sold. Requires authentication and ownership of the item.
+    /// Mark a pending item as sold. Requires authentication and authorization (item owner or admin).
     /// 
     /// This action:
-    /// - Validates that the authenticated user is the seller of the item
+    /// - Validates that the authenticated user is the seller of the item or an admin
     /// - Ensures the item is currently in "Pending" status (2)
     /// - Updates the item status to "Sold" (3)
     /// - Returns the updated item details
@@ -362,12 +364,13 @@ public class ItemsController : ControllerBase
     /// <returns>Updated item with Sold status</returns>
     /// <response code="200">Item marked as sold successfully</response>
     /// <response code="401">Authentication required</response>
-    /// <response code="403">Not authorized to mark this item as sold (not the seller)</response>
+    /// <response code="403">Not authorized to mark this item as sold</response>
     /// <response code="404">Item not found</response>
     /// <response code="409">Item cannot be marked as sold (not in Pending status)</response>
     /// <response code="500">Internal server error</response>
     [HttpPost("{id:int}/mark-sold")]
     [Authorize]
+    [Authorize(Policy = "ItemOwnerOrAdmin")]
     [ProducesResponseType(typeof(ItemDto), 200)]
     [ProducesResponseType(typeof(object), 401)]
     [ProducesResponseType(typeof(object), 403)]
