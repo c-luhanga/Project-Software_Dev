@@ -214,7 +214,7 @@ builder.Services.AddAuthorization(options =>
 });
 
 // Register custom authorization handler for "ItemOwnerOrAdmin"
-builder.Services.AddSingleton<IAuthorizationHandler, ItemOwnerOrAdminHandler>();
+builder.Services.AddScoped<IAuthorizationHandler, ItemOwnerOrAdminHandler>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
