@@ -47,8 +47,8 @@ public class UserRepository : IUserRepository
     {
         using var connection = _connectionFactory.CreateConnection();
         return await connection.QueryFirstOrDefaultAsync<User>(
-            "SELECT * FROM dbo.Users WHERE UserID=@id AND IsDeleted=0;",
-            new { id },
+            UserQueries.GetById,
+            new { Id = id },
             commandTimeout: 30
         );
     }
