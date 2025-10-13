@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Reflection;
 using UniShareProject.Repository.Data.Interfaces;
+using ConnectionProject.API.Controllers.Base;
 
 namespace ConnectionProject.API.Controllers;
 
@@ -12,15 +13,14 @@ namespace ConnectionProject.API.Controllers;
 [Route("api/health")]
 [AllowAnonymous]
 [Produces("application/json")]
-public class HealthController : ControllerBase
+public class HealthController : BaseApiController
 {
     private readonly IDbConnectionFactory _connectionFactory;
-    private readonly ILogger<HealthController> _logger;
 
-    public HealthController(IDbConnectionFactory connectionFactory, ILogger<HealthController> logger)
+    public HealthController(IDbConnectionFactory connectionFactory, ILogger<HealthController> logger) 
+        : base(logger)
     {
         _connectionFactory = connectionFactory;
-        _logger = logger;
     }
 
     /// <summary>
@@ -69,7 +69,7 @@ public class HealthController : ControllerBase
             command.CommandText = "SELECT 1";
             await command.ExecuteScalarAsync(ct);
             
-            _logger.LogInformation("[Health] Health check passed - database connected");
+            Logger.LogInformation("[Health] Health check passed - database connected");
         }
         catch (Exception ex)
         {
@@ -77,7 +77,7 @@ public class HealthController : ControllerBase
             overallStatus = "unhealthy";
             statusCode = 503;
             
-            _logger.LogError(ex, "[Health] Health check failed - database connection error");
+            Logger.LogError(ex, "[Health] Health check failed - database connection error");
         }
 
         var response = new
@@ -127,7 +127,7 @@ public class HealthController : ControllerBase
         var environment = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "unknown";
         var dotnetVersion = Environment.Version.ToString();
 
-        _logger.LogInformation("[Health] Version info requested - v{Version}", version);
+        Logger.LogInformation("[Health] Version info requested - v{Version}", version);
 
         var response = new
         {
@@ -216,7 +216,7 @@ public class HealthController : ControllerBase
             overallStatus = "unhealthy";
             statusCode = 503;
             
-            _logger.LogError(ex, "[Health] Detailed health check - database unhealthy");
+            Logger.LogError(ex, "[Health] Detailed health check - database unhealthy");
         }
 
         // API health (always healthy if we can respond)

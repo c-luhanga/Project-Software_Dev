@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using UniShareProject.services.DTOs;
 using UniShareProject.services.Interfaces;
+using ConnectionProject.API.Controllers.Base;
 
 namespace ConnectionProject.API.Controllers;
 
@@ -12,15 +13,13 @@ namespace ConnectionProject.API.Controllers;
 [Route("api/auth")]
 [AllowAnonymous] // Explicitly allow anonymous access to auth endpoints
 [Produces("application/json")]
-public class AuthController : ControllerBase
+public class AuthController : BaseApiController
 {
     private readonly IAuthService _authService;
-    private readonly ILogger<AuthController> _logger;
 
-    public AuthController(IAuthService authService, ILogger<AuthController> logger)
+    public AuthController(IAuthService authService, ILogger<AuthController> logger) : base(logger)
     {
         _authService = authService;
-        _logger = logger;
     }
 
     /// <summary>
@@ -56,10 +55,9 @@ public class AuthController : ControllerBase
     [ProducesResponseType(typeof(object), 500)]
     public async Task<IActionResult> Register([FromBody] RegisterRequest request, CancellationToken ct)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
+        var validationResult = ValidateModelState();
+        if (validationResult != null)
+            return validationResult;
 
         try
         {
@@ -68,17 +66,17 @@ public class AuthController : ControllerBase
         }
         catch (InvalidOperationException ex) when (ex.Message.Contains("already exists"))
         {
-            _logger.LogWarning("Registration failed - duplicate email: {Email}", request.Email);
+            Logger.LogWarning("Registration failed - duplicate email: {Email}", request.Email);
             return Conflict(new { message = ex.Message });
         }
         catch (InvalidOperationException ex) when (ex.Message.Contains("@principia.edu"))
         {
-            _logger.LogWarning("Registration failed - invalid domain: {Email}", request.Email);
+            Logger.LogWarning("Registration failed - invalid domain: {Email}", request.Email);
             return BadRequest(new { message = ex.Message });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Registration failed for email: {Email}", request.Email);
+            Logger.LogError(ex, "Registration failed for email: {Email}", request.Email);
             return StatusCode(500, new { message = "Internal server error occurred during registration" });
         }
     }
@@ -116,10 +114,9 @@ public class AuthController : ControllerBase
     [ProducesResponseType(typeof(object), 500)]
     public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken ct)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
+        var validationResult = ValidateModelState();
+        if (validationResult != null)
+            return validationResult;
 
         try
         {
@@ -128,12 +125,12 @@ public class AuthController : ControllerBase
         }
         catch (UnauthorizedAccessException ex)
         {
-            _logger.LogWarning("Login failed for email: {Email} - {Message}", request.Email, ex.Message);
+            Logger.LogWarning("Login failed for email: {Email} - {Message}", request.Email, ex.Message);
             return Unauthorized(new { message = "Invalid credentials" });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Login failed for email: {Email}", request.Email);
+            Logger.LogError(ex, "Login failed for email: {Email}", request.Email);
             return StatusCode(500, new { message = "Internal server error occurred during login" });
         }
     }

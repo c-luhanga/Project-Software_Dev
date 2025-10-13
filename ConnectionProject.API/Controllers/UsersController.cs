@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using UniShareProject.services.DTOs;
 using UniShareProject.services.Interfaces;
-using System.Security.Claims;
+using ConnectionProject.API.Controllers.Base;
 
 namespace ConnectionProject.API.Controllers;
 
@@ -13,15 +13,13 @@ namespace ConnectionProject.API.Controllers;
 [Route("api/users")]
 [Authorize]
 [Produces("application/json")]
-public class UsersController : ControllerBase
+public class UsersController : BaseApiController
 {
     private readonly IUserService _service;
-    private readonly ILogger<UsersController> _logger;
 
-    public UsersController(IUserService service, ILogger<UsersController> logger)
+    public UsersController(IUserService service, ILogger<UsersController> logger) : base(logger)
     {
         _service = service;
-        _logger = logger;
     }
 
     /// <summary>
@@ -52,13 +50,13 @@ public class UsersController : ControllerBase
     {
         try
         {
-            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var userId = GetCurrentUserId();
             var user = await _service.GetMeAsync(userId, ct);
             return user is null ? NotFound(new { message = "User not found" }) : Ok(user);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error retrieving user profile");
+            Logger.LogError(ex, "Error retrieving user profile");
             return StatusCode(500, new { message = "Internal server error occurred" });
         }
     }
@@ -109,23 +107,23 @@ public class UsersController : ControllerBase
 
         try
         {
-            var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var userId = GetCurrentUserId();
             var user = await _service.UpdateMeAsync(userId, req, ct);
             return Ok(user);
         }
         catch (FluentValidation.ValidationException ex)
         {
-            _logger.LogWarning("Validation failed for update profile: {Message}", ex.Message);
+            Logger.LogWarning("Validation failed for update profile: {Message}", ex.Message);
             return BadRequest(new { message = ex.Message });
         }
         catch (InvalidOperationException ex) when (ex.Message.Contains("not found"))
         {
-            _logger.LogWarning("User not found for update: {Message}", ex.Message);
+            Logger.LogWarning("User not found for update: {Message}", ex.Message);
             return NotFound(new { message = ex.Message });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error updating user profile");
+            Logger.LogError(ex, "Error updating user profile");
             return StatusCode(500, new { message = "Internal server error occurred" });
         }
     }

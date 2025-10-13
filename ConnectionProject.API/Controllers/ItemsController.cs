@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 using UniShareProject.services.Interfaces;
 using UniShareProject.services.Models;
+using ConnectionProject.API.Controllers.Base;
 
 namespace ConnectionProject.API.Controllers;
 
@@ -11,15 +11,13 @@ namespace ConnectionProject.API.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/items")]
-public class ItemsController : ControllerBase
+public class ItemsController : BaseApiController
 {
     private readonly IItemService _itemService;
-    private readonly ILogger<ItemsController> _logger;
 
-    public ItemsController(IItemService itemService, ILogger<ItemsController> logger)
+    public ItemsController(IItemService itemService, ILogger<ItemsController> logger) : base(logger)
     {
         _itemService = itemService;
-        _logger = logger;
     }
 
     /// <summary>
@@ -62,24 +60,15 @@ public class ItemsController : ControllerBase
     [ProducesResponseType(typeof(object), 500)]
     public async Task<IActionResult> CreateItem([FromBody] CreateItemRequest request, CancellationToken ct)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
+        var validationResult = ValidateModelState();
+        if (validationResult != null)
+            return validationResult;
 
-        // Extract seller ID from JWT claim 'sub'
-        var sellerIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
-                         ?? User.FindFirst("sub")?.Value;
-        
-        if (string.IsNullOrEmpty(sellerIdClaim) || !int.TryParse(sellerIdClaim, out int sellerId))
-        {
-            _logger.LogWarning("Unable to extract valid seller ID from JWT claims");
-            throw new UnauthorizedAccessException("Invalid or missing user identification");
-        }
+        var sellerId = GetCurrentUserId();
 
         var itemDto = await _itemService.CreateAsync(request, sellerId, ct);
         
-        _logger.LogInformation("Item created successfully with ID: {ItemId} by seller: {SellerId}", 
+        Logger.LogInformation("Item created successfully with ID: {ItemId} by seller: {SellerId}", 
             itemDto.Id, sellerId);
         
         return CreatedAtAction(nameof(GetItem), new { id = itemDto.Id }, itemDto);
@@ -115,7 +104,7 @@ public class ItemsController : ControllerBase
         
         if (item == null)
         {
-            _logger.LogInformation("Item not found: {ItemId}", id);
+            Logger.LogInformation("Item not found: {ItemId}", id);
             throw new KeyNotFoundException($"Item with ID {id} not found");
         }
 
@@ -155,14 +144,13 @@ public class ItemsController : ControllerBase
     [ProducesResponseType(typeof(object), 500)]
     public async Task<IActionResult> SearchItems([FromQuery] SearchItemsRequest request, CancellationToken ct)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
+        var validationResult = ValidateModelState();
+        if (validationResult != null)
+            return validationResult;
 
         var result = await _itemService.SearchAsync(request, ct);
         
-        _logger.LogInformation("Items search completed. Page: {Page}, PageSize: {PageSize}, Total: {Total}", 
+        Logger.LogInformation("Items search completed. Page: {Page}, PageSize: {PageSize}, Total: {Total}", 
             request.Page, request.PageSize, result.Total);
         
         return Ok(result);
@@ -201,19 +189,11 @@ public class ItemsController : ControllerBase
     [ProducesResponseType(typeof(object), 500)]
     public async Task<IActionResult> RequestPurchase(int id, CancellationToken ct)
     {
-        // Extract buyer ID from JWT claim 'sub'
-        var buyerIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
-                        ?? User.FindFirst("sub")?.Value;
-        
-        if (string.IsNullOrEmpty(buyerIdClaim) || !int.TryParse(buyerIdClaim, out int buyerId))
-        {
-            _logger.LogWarning("Unable to extract valid buyer ID from JWT claims");
-            throw new UnauthorizedAccessException("Invalid or missing user identification");
-        }
+        var buyerId = GetCurrentUserId();
 
         var updatedItem = await _itemService.RequestPurchaseAsync(id, buyerId, ct);
         
-        _logger.LogInformation("Purchase requested successfully. ItemId: {ItemId}, Buyer: {BuyerId}", 
+        Logger.LogInformation("Purchase requested successfully. ItemId: {ItemId}, Buyer: {BuyerId}", 
             id, buyerId);
         
         return Ok(updatedItem);
@@ -255,19 +235,11 @@ public class ItemsController : ControllerBase
     [ProducesResponseType(typeof(object), 500)]
     public async Task<IActionResult> UpdateItemStatus(int id, [FromQuery] byte statusId, CancellationToken ct)
     {
-        // Extract actor ID from JWT claim 'sub'
-        var actorIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
-                        ?? User.FindFirst("sub")?.Value;
-        
-        if (string.IsNullOrEmpty(actorIdClaim) || !int.TryParse(actorIdClaim, out int actorId))
-        {
-            _logger.LogWarning("Unable to extract valid actor ID from JWT claims");
-            throw new UnauthorizedAccessException("Invalid or missing user identification");
-        }
+        var actorId = GetCurrentUserId();
 
         var updatedItem = await _itemService.UpdateStatusAsync(id, statusId, actorId, ct);
         
-        _logger.LogInformation("Item status updated successfully. ItemId: {ItemId}, NewStatus: {StatusId}, Actor: {ActorId}", 
+        Logger.LogInformation("Item status updated successfully. ItemId: {ItemId}, NewStatus: {StatusId}, Actor: {ActorId}", 
             id, statusId, actorId);
         
         return Ok(updatedItem);
@@ -321,24 +293,15 @@ public class ItemsController : ControllerBase
     [ProducesResponseType(typeof(object), 500)]
     public async Task<IActionResult> AddItemImages(int id, [FromBody] AddItemImagesRequest request, CancellationToken ct)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest(ModelState);
-        }
+        var validationResult = ValidateModelState();
+        if (validationResult != null)
+            return validationResult;
 
-        // Extract actor ID from JWT claim 'sub'
-        var actorIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
-                        ?? User.FindFirst("sub")?.Value;
-        
-        if (string.IsNullOrEmpty(actorIdClaim) || !int.TryParse(actorIdClaim, out int actorId))
-        {
-            _logger.LogWarning("Unable to extract valid actor ID from JWT claims");
-            throw new UnauthorizedAccessException("Invalid or missing user identification");
-        }
+        var actorId = GetCurrentUserId();
 
         var imageUrls = await _itemService.AddImagesAsync(id, actorId, request, ct);
         
-        _logger.LogInformation("Images added successfully to item {ItemId} by user {ActorId}. Total images: {ImageCount}", 
+        Logger.LogInformation("Images added successfully to item {ItemId} by user {ActorId}. Total images: {ImageCount}", 
             id, actorId, imageUrls.Count);
         
         return Ok(imageUrls);
@@ -379,19 +342,11 @@ public class ItemsController : ControllerBase
     [ProducesResponseType(typeof(object), 500)]
     public async Task<IActionResult> MarkItemSold(int id, CancellationToken ct)
     {
-        // Extract actor ID from JWT claim 'sub'
-        var actorIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
-                        ?? User.FindFirst("sub")?.Value;
-        
-        if (string.IsNullOrEmpty(actorIdClaim) || !int.TryParse(actorIdClaim, out int actorId))
-        {
-            _logger.LogWarning("Unable to extract valid actor ID from JWT claims");
-            throw new UnauthorizedAccessException("Invalid or missing user identification");
-        }
+        var actorId = GetCurrentUserId();
 
         var updatedItem = await _itemService.MarkSoldAsync(id, actorId, ct);
         
-        _logger.LogInformation("Item {ItemId} marked as sold by user {ActorId}", id, actorId);
+        Logger.LogInformation("Item {ItemId} marked as sold by user {ActorId}", id, actorId);
         
         return Ok(updatedItem);
     }

@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using UniShareProject.services.Interfaces;
 using UniShareProject.services.DTOs;
-using System.Security.Claims;
+using ConnectionProject.API.Controllers.Base;
 
 namespace ConnectionProject.API.Controllers;
 
@@ -13,17 +13,16 @@ namespace ConnectionProject.API.Controllers;
 [Route("api/admin")]
 [Authorize(Policy = "AdminOnly")]
 [Produces("application/json")]
-public class AdminController : ControllerBase
+public class AdminController : BaseApiController
 {
     private readonly IUserService _userService;
     private readonly IItemService _itemService;
-    private readonly ILogger<AdminController> _logger;
 
-    public AdminController(IUserService userService, IItemService itemService, ILogger<AdminController> logger)
+    public AdminController(IUserService userService, IItemService itemService, ILogger<AdminController> logger) 
+        : base(logger)
     {
         _userService = userService;
         _itemService = itemService;
-        _logger = logger;
     }
 
     /// <summary>
@@ -54,9 +53,9 @@ public class AdminController : ControllerBase
     {
         try
         {
-            var adminId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var adminId = GetCurrentUserId();
             
-            _logger.LogInformation("Admin dashboard accessed by user {AdminId}", adminId);
+            Logger.LogInformation("Admin dashboard accessed by user {AdminId}", adminId);
             
             // This is a basic example - you would implement actual statistics gathering
             var dashboardData = new
@@ -74,7 +73,7 @@ public class AdminController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error retrieving admin dashboard");
+            Logger.LogError(ex, "Error retrieving admin dashboard");
             return StatusCode(500, new { message = "Internal server error occurred" });
         }
     }
@@ -112,9 +111,9 @@ public class AdminController : ControllerBase
     {
         try
         {
-            var adminId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var adminId = GetCurrentUserId();
             
-            _logger.LogWarning("Admin {AdminId} attempting to delete item {ItemId}", adminId, id);
+            Logger.LogWarning("Admin {AdminId} attempting to delete item {ItemId}", adminId, id);
             
             // Note: This would require implementing a DeleteAsync method in IItemService
             // For now, return a placeholder response
@@ -127,7 +126,7 @@ public class AdminController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error deleting item {ItemId}", id);
+            Logger.LogError(ex, "Error deleting item {ItemId}", id);
             return StatusCode(500, new { message = "Internal server error occurred" });
         }
     }
@@ -169,9 +168,9 @@ public class AdminController : ControllerBase
     {
         try
         {
-            var adminId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var adminId = GetCurrentUserId();
             
-            _logger.LogWarning("Admin {AdminId} attempting to ban user {UserId}", adminId, id);
+            Logger.LogWarning("Admin {AdminId} attempting to ban user {UserId}", adminId, id);
             
             // Note: This would require implementing a BanUserAsync method in IUserService
             // For now, return a placeholder response
@@ -184,7 +183,7 @@ public class AdminController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error banning user {UserId}", id);
+            Logger.LogError(ex, "Error banning user {UserId}", id);
             return StatusCode(500, new { message = "Internal server error occurred" });
         }
     }
@@ -224,9 +223,9 @@ public class AdminController : ControllerBase
     {
         try
         {
-            var adminId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            var adminId = GetCurrentUserId();
             
-            _logger.LogInformation("Admin {AdminId} attempting to unban user {UserId}", adminId, id);
+            Logger.LogInformation("Admin {AdminId} attempting to unban user {UserId}", adminId, id);
             
             // Note: This would require implementing an UnbanUserAsync method in IUserService
             // For now, return a placeholder response
@@ -239,7 +238,7 @@ public class AdminController : ControllerBase
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error unbanning user {UserId}", id);
+            Logger.LogError(ex, "Error unbanning user {UserId}", id);
             return StatusCode(500, new { message = "Internal server error occurred" });
         }
     }
