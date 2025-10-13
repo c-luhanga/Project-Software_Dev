@@ -21,4 +21,5 @@ public interface IUserRepository
     Task<bool> DeleteAsync(int id, IUnitOfWork unitOfWork);
     Task<IEnumerable<User>> GetAllAsync(IUnitOfWork unitOfWork);
     Task<User?> GetByIdAsync(int id, CancellationToken ct);
+    Task<int> UpdateProfileAsync(int userId, string? phone, string? house, string? profileImageUrl, CancellationToken ct);
 }

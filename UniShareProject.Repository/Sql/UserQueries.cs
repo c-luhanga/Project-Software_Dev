@@ -65,6 +65,15 @@ public static class UserQueries
         WHERE UserID = @UserID AND IsDeleted = 0";
 
     /// <summary>
+    /// Updates user profile information (Phone, House, ProfileImageURL) and LastSeen timestamp
+    /// </summary>
+    public const string UpdateProfile = @"
+        UPDATE dbo.Users
+        SET Phone=@phone, House=@house, ProfileImageURL=@profileImageUrl, LastSeen=SYSUTCDATETIME()
+        WHERE UserID=@userId AND IsDeleted=0;
+        SELECT @@ROWCOUNT;";
+
+    /// <summary>
     /// Soft delete by setting IsDeleted to 1
     /// </summary>
     public const string SoftDelete = @"

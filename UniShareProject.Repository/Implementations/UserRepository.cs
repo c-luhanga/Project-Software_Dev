@@ -53,6 +53,17 @@ public class UserRepository : IUserRepository
         );
     }
 
+    public async Task<int> UpdateProfileAsync(int userId, string? phone, string? house, string? profileImageUrl, CancellationToken ct)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+        var rowsAffected = await connection.ExecuteScalarAsync<int>(
+            UserQueries.UpdateProfile,
+            new { userId, phone, house, profileImageUrl },
+            commandTimeout: 30
+        );
+        return rowsAffected;
+    }
+
     // Legacy methods for backward compatibility
     public async Task<User?> GetByIdAsync(int id, IUnitOfWork unitOfWork)
     {

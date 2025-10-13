@@ -1,0 +1,131 @@
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using UniShareProject.services.DTOs;
+using UniShareProject.services.Interfaces;
+
+namespace ConnectionProject.API.Controllers;
+
+/// <summary>
+/// Handles user profile operations
+/// </summary>
+[ApiController]
+[Route("api/users")]
+[Authorize]
+[Produces("application/json")]
+public class UsersController : ControllerBase
+{
+    private readonly IUserService _service;
+    private readonly ILogger<UsersController> _logger;
+
+    public UsersController(IUserService service, ILogger<UsersController> logger)
+    {
+        _service = service;
+        _logger = logger;
+    }
+
+    /// <summary>
+    /// Get the current authenticated user's profile
+    /// </summary>
+    /// <remarks>
+    /// Retrieves the profile information for the currently authenticated user.
+    /// 
+    /// Sample request:
+    /// 
+    ///     GET /api/users/me
+    ///     Authorization: Bearer {token}
+    /// 
+    /// Requires a valid JWT token in the Authorization header.
+    /// </remarks>
+    /// <param name="ct">Cancellation token</param>
+    /// <returns>User profile data</returns>
+    /// <response code="200">Returns the user profile</response>
+    /// <response code="401">User is not authenticated</response>
+    /// <response code="404">User not found</response>
+    /// <response code="500">Internal server error</response>
+    [HttpGet("me")]
+    [ProducesResponseType(typeof(UserDto), 200)]
+    [ProducesResponseType(typeof(object), 401)]
+    [ProducesResponseType(typeof(object), 404)]
+    [ProducesResponseType(typeof(object), 500)]
+    public async Task<ActionResult<UserDto>> GetMe(CancellationToken ct)
+    {
+        try
+        {
+            var userId = int.Parse(User.FindFirst("sub")!.Value);
+            var user = await _service.GetMeAsync(userId, ct);
+            return user is null ? NotFound(new { message = "User not found" }) : Ok(user);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error retrieving user profile");
+            return StatusCode(500, new { message = "Internal server error occurred" });
+        }
+    }
+
+    /// <summary>
+    /// Update the current authenticated user's profile
+    /// </summary>
+    /// <remarks>
+    /// Updates the profile information for the currently authenticated user.
+    /// 
+    /// Sample request:
+    /// 
+    ///     PUT /api/users/me
+    ///     Authorization: Bearer {token}
+    ///     {
+    ///        "phone": "+1234567890",
+    ///        "house": "Johnson Hall",
+    ///        "profileImageUrl": "https://example.com/images/profile.jpg"
+    ///     }
+    /// 
+    /// All fields are optional. Validation rules:
+    /// - Phone: max 20 characters
+    /// - House: max 50 characters
+    /// - ProfileImageUrl: must be a valid absolute URL
+    /// 
+    /// Requires a valid JWT token in the Authorization header.
+    /// </remarks>
+    /// <param name="req">Update request with new profile data</param>
+    /// <param name="ct">Cancellation token</param>
+    /// <returns>Updated user profile data</returns>
+    /// <response code="200">Profile successfully updated</response>
+    /// <response code="400">Invalid request data</response>
+    /// <response code="401">User is not authenticated</response>
+    /// <response code="404">User not found</response>
+    /// <response code="500">Internal server error</response>
+    [HttpPut("me")]
+    [ProducesResponseType(typeof(UserDto), 200)]
+    [ProducesResponseType(typeof(object), 400)]
+    [ProducesResponseType(typeof(object), 401)]
+    [ProducesResponseType(typeof(object), 404)]
+    [ProducesResponseType(typeof(object), 500)]
+    public async Task<ActionResult<UserDto>> UpdateMe([FromBody] UpdateMeRequest req, CancellationToken ct)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        try
+        {
+            var userId = int.Parse(User.FindFirst("sub")!.Value);
+            var user = await _service.UpdateMeAsync(userId, req, ct);
+            return Ok(user);
+        }
+        catch (FluentValidation.ValidationException ex)
+        {
+            _logger.LogWarning("Validation failed for update profile: {Message}", ex.Message);
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (InvalidOperationException ex) when (ex.Message.Contains("not found"))
+        {
+            _logger.LogWarning("User not found for update: {Message}", ex.Message);
+            return NotFound(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating user profile");
+            return StatusCode(500, new { message = "Internal server error occurred" });
+        }
+    }
+}

@@ -1,6 +1,7 @@
 using AutoMapper;
 using UniShareProject.Repository.Models;
 using UniShareProject.services.Models;
+using UniShareProject.services.DTOs;
 
 namespace UniShareProject.services.Mapping;
 
@@ -11,6 +12,11 @@ public class UniShareProfile : Profile
 {
     public UniShareProfile()
     {
+        // User mappings
+        CreateMap<User, UserDto>()
+            .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserID))
+            .ForMember(dest => dest.ProfileImageUrl, opt => opt.MapFrom(src => src.ProfileImageURL));
+
         // Item mappings
         CreateMap<Item, ItemDto>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.ItemID))
