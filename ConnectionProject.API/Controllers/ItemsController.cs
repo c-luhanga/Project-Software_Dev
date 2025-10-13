@@ -271,4 +271,125 @@ public class ItemsController : ControllerBase
         
         return Ok(updatedItem);
     }
+
+    /// <summary>
+    /// Add images to an existing item
+    /// </summary>
+    /// <remarks>
+    /// Add 1-4 image URLs to an existing item. Requires authentication and ownership of the item.
+    /// 
+    /// This action:
+    /// - Validates that the authenticated user is the seller of the item
+    /// - Ensures the total number of images (existing + new) does not exceed 4
+    /// - Adds the provided image URLs to the item
+    /// - Returns all image URLs for the item after adding
+    /// 
+    /// Sample request:
+    /// 
+    ///     POST /api/items/123/images
+    ///     {
+    ///        "imageUrls": [
+    ///          "https://example.com/image1.jpg",
+    ///          "https://example.com/image2.jpg"
+    ///        ]
+    ///     }
+    /// 
+    /// Each URL must be a valid absolute HTTP/HTTPS URL.
+    /// The maximum total number of images per item is 4.
+    /// </remarks>
+    /// <param name="id">Item ID to add images to</param>
+    /// <param name="request">Request containing image URLs to add</param>
+    /// <param name="ct">Cancellation token</param>
+    /// <returns>All image URLs for the item after adding</returns>
+    /// <response code="200">Images added successfully</response>
+    /// <response code="400">Invalid request data or validation errors</response>
+    /// <response code="401">Authentication required</response>
+    /// <response code="403">Not authorized to add images to this item (not the seller)</response>
+    /// <response code="404">Item not found</response>
+    /// <response code="409">Would exceed maximum of 4 images per item</response>
+    /// <response code="500">Internal server error</response>
+    [HttpPost("{id:int}/images")]
+    [Authorize]
+    [ProducesResponseType(typeof(IReadOnlyList<string>), 200)]
+    [ProducesResponseType(typeof(object), 400)]
+    [ProducesResponseType(typeof(object), 401)]
+    [ProducesResponseType(typeof(object), 403)]
+    [ProducesResponseType(typeof(object), 404)]
+    [ProducesResponseType(typeof(object), 409)]
+    [ProducesResponseType(typeof(object), 500)]
+    public async Task<IActionResult> AddItemImages(int id, [FromBody] AddItemImagesRequest request, CancellationToken ct)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        // Extract actor ID from JWT claim 'sub'
+        var actorIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
+                        ?? User.FindFirst("sub")?.Value;
+        
+        if (string.IsNullOrEmpty(actorIdClaim) || !int.TryParse(actorIdClaim, out int actorId))
+        {
+            _logger.LogWarning("Unable to extract valid actor ID from JWT claims");
+            throw new UnauthorizedAccessException("Invalid or missing user identification");
+        }
+
+        var imageUrls = await _itemService.AddImagesAsync(id, actorId, request, ct);
+        
+        _logger.LogInformation("Images added successfully to item {ItemId} by user {ActorId}. Total images: {ImageCount}", 
+            id, actorId, imageUrls.Count);
+        
+        return Ok(imageUrls);
+    }
+
+    /// <summary>
+    /// Mark an item as sold
+    /// </summary>
+    /// <remarks>
+    /// Mark a pending item as sold. Requires authentication and ownership of the item.
+    /// 
+    /// This action:
+    /// - Validates that the authenticated user is the seller of the item
+    /// - Ensures the item is currently in "Pending" status (2)
+    /// - Updates the item status to "Sold" (3)
+    /// - Returns the updated item details
+    /// 
+    /// The item must be in "Pending" status to be marked as sold.
+    /// This typically happens after a purchase request has been made and the transaction is completed.
+    /// </remarks>
+    /// <param name="id">Item ID to mark as sold</param>
+    /// <param name="ct">Cancellation token</param>
+    /// <returns>Updated item with Sold status</returns>
+    /// <response code="200">Item marked as sold successfully</response>
+    /// <response code="401">Authentication required</response>
+    /// <response code="403">Not authorized to mark this item as sold (not the seller)</response>
+    /// <response code="404">Item not found</response>
+    /// <response code="409">Item cannot be marked as sold (not in Pending status)</response>
+    /// <response code="500">Internal server error</response>
+    [HttpPost("{id:int}/mark-sold")]
+    [Authorize]
+    [ProducesResponseType(typeof(ItemDto), 200)]
+    [ProducesResponseType(typeof(object), 401)]
+    [ProducesResponseType(typeof(object), 403)]
+    [ProducesResponseType(typeof(object), 404)]
+    [ProducesResponseType(typeof(object), 409)]
+    [ProducesResponseType(typeof(object), 500)]
+    public async Task<IActionResult> MarkItemSold(int id, CancellationToken ct)
+    {
+        // Extract actor ID from JWT claim 'sub'
+        var actorIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value 
+                        ?? User.FindFirst("sub")?.Value;
+        
+        if (string.IsNullOrEmpty(actorIdClaim) || !int.TryParse(actorIdClaim, out int actorId))
+        {
+            _logger.LogWarning("Unable to extract valid actor ID from JWT claims");
+            throw new UnauthorizedAccessException("Invalid or missing user identification");
+        }
+
+        var updatedItem = await _itemService.MarkSoldAsync(id, actorId, ct);
+        
+        _logger.LogInformation("Item {ItemId} marked as sold by user {ActorId}", id, actorId);
+        
+        return Ok(updatedItem);
+    }
 }

@@ -34,6 +34,12 @@ public static class ItemQueries
         SELECT * FROM dbo.Items WHERE ItemID = @Id";
 
     /// <summary>
+    /// Gets seller ID and status for an item by ID
+    /// </summary>
+    public const string GetSellerAndStatus = @"
+        SELECT SellerID, StatusID FROM dbo.Items WHERE ItemID = @Id";
+
+    /// <summary>
     /// Selects all available items (StatusID = 1)
     /// </summary>
     public const string GetAllAvailable = @"

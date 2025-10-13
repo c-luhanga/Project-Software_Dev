@@ -43,6 +43,24 @@ public record CreateItemRequest(
 );
 
 /// <summary>
+/// Request model for adding images to an item
+/// </summary>
+/// <param name="ImageUrls">List of image URLs to add (1-4 URLs required)</param>
+/// <example>
+/// {
+///   "imageUrls": [
+//     "https://example.com/image1.jpg",
+//     "https://example.com/image2.jpg"
+///   ]
+/// }
+/// </example>
+public record AddItemImagesRequest(
+    [property: Required]
+    [property: Description("List of image URLs to add (1-4 URLs required)")]
+    List<string> ImageUrls
+);
+
+/// <summary>
 /// Request model for searching items with optional filters and pagination
 /// </summary>
 /// <param name="CategoryId">Filter by category ID (optional)</param>

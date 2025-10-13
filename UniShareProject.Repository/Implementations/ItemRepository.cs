@@ -50,6 +50,21 @@ public class ItemRepository : IItemRepository
         return await unitOfWork.Connection.QueryFirstOrDefaultAsync<Item>(ItemQueries.GetById, new { Id = id }, unitOfWork.Transaction);
     }
 
+    public async Task<(int SellerId, byte StatusId)?> GetSellerAndStatusAsync(int id, CancellationToken ct)
+    {
+        await using var unitOfWork = _unitOfWorkFactory.Create();
+        
+        var result = await unitOfWork.Connection.QueryFirstOrDefaultAsync<dynamic>(
+            ItemQueries.GetSellerAndStatus, 
+            new { Id = id }, 
+            unitOfWork.Transaction);
+        
+        if (result == null)
+            return null;
+        
+        return ((int)result.SellerID, (byte)result.StatusID);
+    }
+
     public async Task<int> UpdateStatusAsync(int id, byte statusId, CancellationToken ct)
     {
         await using var unitOfWork = _unitOfWorkFactory.Create();
