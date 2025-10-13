@@ -3,12 +3,20 @@ using UniShareProject.Repository.Data.Interfaces;
 using UniShareProject.Repository.Models;
 using UniShareProject.Repository.Repositories;
 using UniShareProject.Repository.Sql;
+using System.Data;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace UniShareProject.Repository.Implementations;
 
 public class UserRepository : IUserRepository
 {
-    public UserRepository() {}
+    private readonly IDbConnectionFactory _connectionFactory;
+
+    public UserRepository(IDbConnectionFactory connectionFactory)
+    {
+        _connectionFactory = connectionFactory;
+    }
 
     // Auth helper methods now require a unit of work
     public async Task<bool> EmailExistsAsync(string email, IUnitOfWork unitOfWork, CancellationToken ct)
@@ -32,6 +40,16 @@ public class UserRepository : IUserRepository
             UserQueries.GetByEmail,
             new { Email = email },
             unitOfWork.Transaction
+        );
+    }
+
+    public async Task<User?> GetByIdAsync(int id, CancellationToken ct)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+        return await connection.QueryFirstOrDefaultAsync<User>(
+            "SELECT * FROM dbo.Users WHERE UserID=@id AND IsDeleted=0;",
+            new { id },
+            commandTimeout: 30
         );
     }
 

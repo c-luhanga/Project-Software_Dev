@@ -1,5 +1,7 @@
 using UniShareProject.Repository.Data.Interfaces;
 using UniShareProject.Repository.Models;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace UniShareProject.Repository.Repositories;
 
@@ -18,4 +20,5 @@ public interface IUserRepository
     Task<bool> UpdateAsync(User user, IUnitOfWork unitOfWork);
     Task<bool> DeleteAsync(int id, IUnitOfWork unitOfWork);
     Task<IEnumerable<User>> GetAllAsync(IUnitOfWork unitOfWork);
+    Task<User?> GetByIdAsync(int id, CancellationToken ct);
 }
