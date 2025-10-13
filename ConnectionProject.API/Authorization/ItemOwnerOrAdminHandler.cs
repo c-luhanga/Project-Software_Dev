@@ -1,4 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
+using UniShareProject.Repository.Repositories;
 
 namespace UniShareProject.API.Authorization
 {
@@ -9,17 +11,69 @@ namespace UniShareProject.API.Authorization
 
     public class ItemOwnerOrAdminHandler : AuthorizationHandler<ItemOwnerOrAdminRequirement>
     {
-        protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, ItemOwnerOrAdminRequirement requirement)
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly IItemRepository _itemRepository;
+
+        public ItemOwnerOrAdminHandler(IHttpContextAccessor httpContextAccessor, IItemRepository itemRepository)
         {
-            // Example logic: allow if user is admin, or item owner (customize as needed)
+            _httpContextAccessor = httpContextAccessor;
+            _itemRepository = itemRepository;
+        }
+
+        protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, ItemOwnerOrAdminRequirement requirement)
+        {
+            // Check if user has admin role first
             if (context.User.IsInRole("admin"))
             {
                 context.Succeed(requirement);
-                return Task.CompletedTask;
+                return;
             }
-            // Item ownership logic should be implemented in the resource-based handler in your controller
-            // For now, just fail if not admin
-            return Task.CompletedTask;
+
+            // Get current HttpContext
+            var httpContext = _httpContextAccessor.HttpContext;
+            if (httpContext == null)
+            {
+                return; // Deny if no HttpContext
+            }
+
+            // Try to get item ID from route values (check both "id" and "itemId")
+            var routeValues = httpContext.Request.RouteValues;
+            var itemIdValue = routeValues["id"] ?? routeValues["itemId"];
+            
+            if (itemIdValue == null || !int.TryParse(itemIdValue.ToString(), out int itemId))
+            {
+                return; // Deny if no valid item ID found
+            }
+
+            // Get current user ID from the "sub" claim
+            var userIdClaim = context.User.FindFirst("sub")?.Value;
+            if (userIdClaim == null || !int.TryParse(userIdClaim, out int userId))
+            {
+                return; // Deny if no valid user ID found
+            }
+
+            try
+            {
+                // Query database to get seller and status
+                var sellerAndStatus = await _itemRepository.GetSellerAndStatusAsync(itemId, CancellationToken.None);
+                
+                if (sellerAndStatus == null)
+                {
+                    return; // Deny if item not found
+                }
+
+                // Check if current user is the seller of the item
+                if (sellerAndStatus.Value.SellerId == userId)
+                {
+                    context.Succeed(requirement);
+                }
+                // Otherwise, deny (do nothing)
+            }
+            catch
+            {
+                // Deny on any database errors
+                return;
+            }
         }
     }
 }

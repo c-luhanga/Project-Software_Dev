@@ -71,6 +71,9 @@ builder.Services.AddCors(options =>
 // Add services to the container.
 builder.Services.AddControllers();
 
+// Add HttpContextAccessor for authorization handlers
+builder.Services.AddHttpContextAccessor();
+
 // FluentValidation - Register validators from both API and Services assemblies
 builder.Services.AddFluentValidationAutoValidation()
                 .AddFluentValidationClientsideAdapters()
