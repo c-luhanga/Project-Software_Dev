@@ -23,6 +23,8 @@ using Microsoft.Extensions.Logging;
 using System.Security.Claims;
 using ConnectionProject.API.Middleware;
 using System.Reflection;
+using Microsoft.AspNetCore.Authorization;
+using UniShareProject.API.Authorization; // Ensure this namespace exists for your custom handler
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -133,7 +135,7 @@ builder.Services.AddAuthentication(options =>
         ClockSkew = TimeSpan.Zero,
         // Add these to help with claim mapping
         NameClaimType = "sub",
-        RoleClaimType = "role"
+        RoleClaimType = ClaimTypes.Role // <-- Map role claim to ClaimTypes.Role
     };
 
     // Detailed event logging for bearer auth
@@ -184,10 +186,32 @@ builder.Services.AddAuthentication(options =>
 // Authorization with default policy requiring authentication
 builder.Services.AddAuthorization(options =>
 {
-    options.FallbackPolicy = new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
+    options.FallbackPolicy = new AuthorizationPolicyBuilder()
         .RequireAuthenticatedUser()
         .Build();
+
+    // "AdminOnly" policy: RequireRole("admin")
+    options.AddPolicy("AdminOnly", policy =>
+        policy.RequireRole("admin"));
+
+    // "PrincipiaEmail" policy: custom assertion for @principia.edu
+    options.AddPolicy("PrincipiaEmail", policy =>
+        policy.RequireAssertion(context =>
+        {
+            var email = context.User.Identity?.Name
+                ?? context.User.FindFirst("email")?.Value
+                ?? context.User.FindFirst(ClaimTypes.Email)?.Value;
+
+            return !string.IsNullOrEmpty(email) && email.EndsWith("@principia.edu", StringComparison.OrdinalIgnoreCase);
+        }));
+
+    // "ItemOwnerOrAdmin" policy: empty requirement, handled by custom handler
+    options.AddPolicy("ItemOwnerOrAdmin", policy =>
+        policy.Requirements.Add(new ItemOwnerOrAdminRequirement()));
 });
+
+// Register custom authorization handler for "ItemOwnerOrAdmin"
+builder.Services.AddSingleton<IAuthorizationHandler, ItemOwnerOrAdminHandler>();
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
