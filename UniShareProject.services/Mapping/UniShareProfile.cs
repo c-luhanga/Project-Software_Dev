@@ -42,13 +42,25 @@ public class UniShareProfile : Profile
             .ForMember(dest => dest.HasNextPage, opt => opt.MapFrom(src => src.HasNextPage))
             .ForMember(dest => dest.HasPreviousPage, opt => opt.MapFrom(src => src.HasPreviousPage));
 
-        // Messaging mappings
+        // Messaging mappings - Entity to DTO mapping with proper DB column mapping
         CreateMap<Message, MessageDto>()
             .ForMember(dest => dest.MessageId, opt => opt.MapFrom(src => src.MessageID))
             .ForMember(dest => dest.ConversationId, opt => opt.MapFrom(src => src.ConversationID))
             .ForMember(dest => dest.SenderId, opt => opt.MapFrom(src => src.SenderID))
+            .ForMember(dest => dest.Content, opt => opt.MapFrom(src => src.Content))
             .ForMember(dest => dest.Timestamp, opt => opt.MapFrom(src => src.Timestamp));
 
+        // Paged messaging mappings
+        CreateMap<PagedResult<Message>, PagedResult<MessageDto>>()
+            .ForMember(d => d.Items, m => m.MapFrom(s => s.Items))
+            .ForMember(dest => dest.Total, opt => opt.MapFrom(src => src.Total))
+            .ForMember(dest => dest.Page, opt => opt.MapFrom(src => src.Page))
+            .ForMember(dest => dest.PageSize, opt => opt.MapFrom(src => src.PageSize))
+            .ForMember(dest => dest.TotalPages, opt => opt.MapFrom(src => src.TotalPages))
+            .ForMember(dest => dest.HasNextPage, opt => opt.MapFrom(src => src.HasNextPage))
+            .ForMember(dest => dest.HasPreviousPage, opt => opt.MapFrom(src => src.HasPreviousPage));
+
+        // Conversation mappings
         CreateMap<ConversationListData, ConversationListItem>()
             .ForMember(dest => dest.ConversationId, opt => opt.MapFrom(src => src.ConversationID))
             .ForMember(dest => dest.ItemId, opt => opt.MapFrom(src => src.ItemID))
@@ -58,12 +70,14 @@ public class UniShareProfile : Profile
             .ForMember(dest => dest.OtherUserName, opt => opt.MapFrom(src => src.OtherUserName))
             .ForMember(dest => dest.UnreadCount, opt => opt.MapFrom(src => src.UnreadCount));
 
-        // Generic PagedResult mapping for messages
-        CreateMap<PagedResult<Message>, PagedResult<MessageDto>>()
-            .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.Items));
-
-        // Generic PagedResult mapping for conversations  
+        // Paged conversation mappings  
         CreateMap<PagedResult<ConversationListData>, PagedResult<ConversationListItem>>()
-            .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.Items));
+            .ForMember(d => d.Items, m => m.MapFrom(s => s.Items))
+            .ForMember(dest => dest.Total, opt => opt.MapFrom(src => src.Total))
+            .ForMember(dest => dest.Page, opt => opt.MapFrom(src => src.Page))
+            .ForMember(dest => dest.PageSize, opt => opt.MapFrom(src => src.PageSize))
+            .ForMember(dest => dest.TotalPages, opt => opt.MapFrom(src => src.TotalPages))
+            .ForMember(dest => dest.HasNextPage, opt => opt.MapFrom(src => src.HasNextPage))
+            .ForMember(dest => dest.HasPreviousPage, opt => opt.MapFrom(src => src.HasPreviousPage));
     }
 }
