@@ -98,6 +98,34 @@ public class UserRepository : IUserRepository
         return rowsAffected;
     }
 
+    // Dashboard statistics methods
+    public async Task<int> GetTotalUsersAsync(CancellationToken ct)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+        return await connection.QuerySingleAsync<int>(
+            UserQueries.GetTotalUsers,
+            commandTimeout: 30
+        );
+    }
+
+    public async Task<int> GetBannedUsersCountAsync(CancellationToken ct)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+        return await connection.QuerySingleAsync<int>(
+            UserQueries.GetBannedUsersCount,
+            commandTimeout: 30
+        );
+    }
+
+    public async Task<int> GetAdminUsersCountAsync(CancellationToken ct)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+        return await connection.QuerySingleAsync<int>(
+            UserQueries.GetAdminUsersCount,
+            commandTimeout: 30
+        );
+    }
+
     // Legacy methods for backward compatibility
     public async Task<User?> GetByIdAsync(int id, IUnitOfWork unitOfWork)
     {

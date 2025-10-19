@@ -41,4 +41,11 @@ public interface IUserService
     /// <param name="ct">Cancellation token</param>
     /// <returns>True if user was unbanned successfully</returns>
     Task<bool> UnbanUserAsync(int userId, int adminId, CancellationToken ct);
+
+    /// <summary>
+    /// Get admin dashboard statistics
+    /// </summary>
+    /// <param name="ct">Cancellation token</param>
+    /// <returns>Dashboard statistics</returns>
+    Task<AdminDashboardDto> GetDashboardAsync(CancellationToken ct);
 }

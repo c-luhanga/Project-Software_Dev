@@ -153,7 +153,52 @@ public class ItemRepository : IItemRepository
         };
     }
 
-    // Existing methods for backward compatibility
+    // Dashboard statistics methods
+    public async Task<int> GetTotalItemsAsync(CancellationToken ct)
+    {
+        await using var unitOfWork = _unitOfWorkFactory.Create();
+        return await unitOfWork.Connection.QuerySingleAsync<int>(
+            ItemQueries.GetTotalItems,
+            transaction: unitOfWork.Transaction
+        );
+    }
+
+    public async Task<int> GetActiveItemsCountAsync(CancellationToken ct)
+    {
+        await using var unitOfWork = _unitOfWorkFactory.Create();
+        return await unitOfWork.Connection.QuerySingleAsync<int>(
+            ItemQueries.GetActiveItemsCount,
+            transaction: unitOfWork.Transaction
+        );
+    }
+
+    public async Task<int> GetPendingItemsCountAsync(CancellationToken ct)
+    {
+        await using var unitOfWork = _unitOfWorkFactory.Create();
+        return await unitOfWork.Connection.QuerySingleAsync<int>(
+            ItemQueries.GetPendingItemsCount,
+            transaction: unitOfWork.Transaction
+        );
+    }
+
+    public async Task<int> GetSoldItemsCountAsync(CancellationToken ct)
+    {
+        await using var unitOfWork = _unitOfWorkFactory.Create();
+        return await unitOfWork.Connection.QuerySingleAsync<int>(
+            ItemQueries.GetSoldItemsCount,
+            transaction: unitOfWork.Transaction
+        );
+    }
+
+    public async Task<int> GetWithdrawnItemsCountAsync(CancellationToken ct)
+    {
+        await using var unitOfWork = _unitOfWorkFactory.Create();
+        return await unitOfWork.Connection.QuerySingleAsync<int>(
+            ItemQueries.GetWithdrawnItemsCount,
+            transaction: unitOfWork.Transaction
+        );
+    }
+
     public async Task<Item?> GetByIdAsync(int id, IUnitOfWork unitOfWork)
     {
         return await unitOfWork.Connection.QueryFirstOrDefaultAsync<Item>(ItemQueries.GetById, new { Id = id }, unitOfWork.Transaction);

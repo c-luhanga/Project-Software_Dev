@@ -2,7 +2,6 @@ using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using UniShareProject.Repository.Repositories;
-using UniShareProject.services.Services;
 using FluentValidation.AspNetCore;
 using FluentValidation;
 using Microsoft.Extensions.Options;

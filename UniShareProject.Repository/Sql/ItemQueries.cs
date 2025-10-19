@@ -104,6 +104,36 @@ public static class ItemQueries
         
         COMMIT TRANSACTION;";
 
+    /// <summary>
+    /// Gets total count of items
+    /// </summary>
+    public const string GetTotalItems = @"
+        SELECT COUNT(1) FROM dbo.Items";
+
+    /// <summary>
+    /// Gets count of active items (StatusID = 1)
+    /// </summary>
+    public const string GetActiveItemsCount = @"
+        SELECT COUNT(1) FROM dbo.Items WHERE StatusID = 1";
+
+    /// <summary>
+    /// Gets count of pending items (StatusID = 2)
+    /// </summary>
+    public const string GetPendingItemsCount = @"
+        SELECT COUNT(1) FROM dbo.Items WHERE StatusID = 2";
+
+    /// <summary>
+    /// Gets count of sold items (StatusID = 3)
+    /// </summary>
+    public const string GetSoldItemsCount = @"
+        SELECT COUNT(1) FROM dbo.Items WHERE StatusID = 3";
+
+    /// <summary>
+    /// Gets count of withdrawn items (StatusID = 4)
+    /// </summary>
+    public const string GetWithdrawnItemsCount = @"
+        SELECT COUNT(1) FROM dbo.Items WHERE StatusID = 4";
+
     #endregion
 
     #region Search with Pagination

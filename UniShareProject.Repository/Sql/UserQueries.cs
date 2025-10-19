@@ -57,6 +57,24 @@ public static class UserQueries
     public const string UserExists = @"
         SELECT COUNT(1) FROM dbo.Users WHERE UserID = @Id AND IsDeleted = 0";
 
+    /// <summary>
+    /// Gets total count of users
+    /// </summary>
+    public const string GetTotalUsers = @"
+        SELECT COUNT(1) FROM dbo.Users WHERE IsDeleted = 0";
+
+    /// <summary>
+    /// Gets count of banned users
+    /// </summary>
+    public const string GetBannedUsersCount = @"
+        SELECT COUNT(1) FROM dbo.Users WHERE IsDeleted = 0 AND IsBanned = 1";
+
+    /// <summary>
+    /// Gets count of admin users
+    /// </summary>
+    public const string GetAdminUsersCount = @"
+        SELECT COUNT(1) FROM dbo.Users WHERE IsDeleted = 0 AND IsAdmin = 1";
+
     #endregion
 
     #region Update Operations

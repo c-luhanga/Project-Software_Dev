@@ -17,6 +17,11 @@ public interface IUserRepository
     Task<int> BanUserAsync(int id, CancellationToken ct);
     Task<int> UnbanUserAsync(int id, CancellationToken ct);
     
+    // Dashboard statistics methods
+    Task<int> GetTotalUsersAsync(CancellationToken ct);
+    Task<int> GetBannedUsersCountAsync(CancellationToken ct);
+    Task<int> GetAdminUsersCountAsync(CancellationToken ct);
+    
     // Legacy methods for backward compatibility with existing services
     Task<User?> GetByIdAsync(int id, IUnitOfWork unitOfWork);
     Task<User?> GetByEmailAsync(string email, IUnitOfWork unitOfWork);

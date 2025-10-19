@@ -12,15 +12,18 @@ namespace UniShareProject.services.Implementations;
 public class UserService : IUserService
 {
     private readonly IUserRepository _userRepository;
+    private readonly IItemRepository _itemRepository;
     private readonly IMapper _mapper;
     private readonly IValidator<UpdateMeRequest> _updateMeValidator;
 
     public UserService(
         IUserRepository userRepository,
+        IItemRepository itemRepository,
         IMapper mapper,
         IValidator<UpdateMeRequest> updateMeValidator)
     {
         _userRepository = userRepository;
+        _itemRepository = itemRepository;
         _mapper = mapper;
         _updateMeValidator = updateMeValidator;
     }
@@ -93,5 +96,44 @@ public class UserService : IUserService
         // Unban the user
         var rowsAffected = await _userRepository.UnbanUserAsync(userId, ct);
         return rowsAffected > 0;
+    }
+
+    public async Task<AdminDashboardDto> GetDashboardAsync(CancellationToken ct)
+    {
+        // Gather all statistics concurrently for better performance
+        var totalUsersTask = _userRepository.GetTotalUsersAsync(ct);
+        var bannedUsersTask = _userRepository.GetBannedUsersCountAsync(ct);
+        var adminUsersTask = _userRepository.GetAdminUsersCountAsync(ct);
+        var totalItemsTask = _itemRepository.GetTotalItemsAsync(ct);
+        var activeItemsTask = _itemRepository.GetActiveItemsCountAsync(ct);
+        var pendingItemsTask = _itemRepository.GetPendingItemsCountAsync(ct);
+        var soldItemsTask = _itemRepository.GetSoldItemsCountAsync(ct);
+        var withdrawnItemsTask = _itemRepository.GetWithdrawnItemsCountAsync(ct);
+
+        // Wait for all tasks to complete
+        await Task.WhenAll(
+            totalUsersTask,
+            bannedUsersTask,
+            adminUsersTask,
+            totalItemsTask,
+            activeItemsTask,
+            pendingItemsTask,
+            soldItemsTask,
+            withdrawnItemsTask
+        );
+
+        return new AdminDashboardDto
+        {
+            TotalUsers = totalUsersTask.Result,
+            BannedUsers = bannedUsersTask.Result,
+            AdminUsers = adminUsersTask.Result,
+            TotalItems = totalItemsTask.Result,
+            ActiveItems = activeItemsTask.Result,
+            PendingItems = pendingItemsTask.Result,
+            SoldItems = soldItemsTask.Result,
+            WithdrawnItems = withdrawnItemsTask.Result,
+            LastUpdated = DateTime.UtcNow,
+            Status = "Operational"
+        };
     }
 }

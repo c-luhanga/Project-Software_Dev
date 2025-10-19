@@ -45,7 +45,7 @@ public class AdminController : BaseApiController
     /// <response code="403">Admin role required</response>
     /// <response code="500">Internal server error</response>
     [HttpGet("dashboard")]
-    [ProducesResponseType(typeof(object), 200)]
+    [ProducesResponseType(typeof(AdminDashboardDto), 200)]
     [ProducesResponseType(typeof(object), 401)]
     [ProducesResponseType(typeof(object), 403)]
     [ProducesResponseType(typeof(object), 500)]
@@ -57,24 +57,14 @@ public class AdminController : BaseApiController
             
             Logger.LogInformation("Admin dashboard accessed by user {AdminId}", adminId);
             
-            // This is a basic example - you would implement actual statistics gathering
-            var dashboardData = new
-            {
-                TotalUsers = "Data not available - implement user counting service",
-                TotalItems = "Data not available - implement item counting service",
-                ActiveItems = "Data not available - implement active item counting",
-                PendingItems = "Data not available - implement pending item counting",
-                BannedUsers = "Data not available - implement banned user counting",
-                Message = "Admin dashboard - implement actual statistics as needed",
-                LastUpdated = DateTime.UtcNow
-            };
-
+            var dashboardData = await _userService.GetDashboardAsync(ct);
+            
             return Ok(dashboardData);
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Error retrieving admin dashboard");
-            return StatusCode(500, new { message = "Internal server error occurred" });
+            return StatusCode(500, new { message = "Internal server error occurred while retrieving dashboard data" });
         }
     }
 

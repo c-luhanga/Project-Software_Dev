@@ -18,6 +18,24 @@ public class ConversationRepository : IConversationRepository
         return await unitOfWork.Connection.QueryAsync<Conversation>(ConversationQueries.GetByUserId, new { UserId = userId }, unitOfWork.Transaction);
     }
 
+    public async Task<IEnumerable<ConversationListData>> GetConversationListByUserIdAsync(int userId, IUnitOfWork unitOfWork)
+    {
+        return await unitOfWork.Connection.QueryAsync<ConversationListData>(ConversationQueries.GetConversationListByUserId, new { UserId = userId }, unitOfWork.Transaction);
+    }
+
+    public async Task<bool> IsUserParticipantAsync(int conversationId, int userId, IUnitOfWork unitOfWork)
+    {
+        var count = await unitOfWork.Connection.QuerySingleAsync<int>(ConversationQueries.CheckUserParticipation, 
+            new { ConversationId = conversationId, UserId = userId }, unitOfWork.Transaction);
+        return count > 0;
+    }
+
+    public async Task<int?> FindExistingConversationAsync(int itemId, int userId1, int userId2, IUnitOfWork unitOfWork)
+    {
+        return await unitOfWork.Connection.QueryFirstOrDefaultAsync<int?>(ConversationQueries.FindExistingConversation, 
+            new { ItemId = itemId, UserId1 = userId1, UserId2 = userId2 }, unitOfWork.Transaction);
+    }
+
     public async Task<int> CreateAsync(Conversation conversation, IUnitOfWork unitOfWork)
     {
         var conversationId = await unitOfWork.Connection.QuerySingleAsync<int>(ConversationQueries.Insert, conversation, unitOfWork.Transaction);

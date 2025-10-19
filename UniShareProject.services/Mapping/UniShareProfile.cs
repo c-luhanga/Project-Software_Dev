@@ -2,6 +2,7 @@ using AutoMapper;
 using UniShareProject.Repository.Models;
 using UniShareProject.services.Models;
 using UniShareProject.services.DTOs;
+using UniShareProject.Repository.Repositories;
 
 namespace UniShareProject.services.Mapping;
 
@@ -40,5 +41,21 @@ public class UniShareProfile : Profile
             .ForMember(dest => dest.TotalPages, opt => opt.MapFrom(src => src.TotalPages))
             .ForMember(dest => dest.HasNextPage, opt => opt.MapFrom(src => src.HasNextPage))
             .ForMember(dest => dest.HasPreviousPage, opt => opt.MapFrom(src => src.HasPreviousPage));
+
+        // Messaging mappings
+        CreateMap<Message, MessageDto>()
+            .ForMember(dest => dest.MessageId, opt => opt.MapFrom(src => src.MessageID))
+            .ForMember(dest => dest.ConversationId, opt => opt.MapFrom(src => src.ConversationID))
+            .ForMember(dest => dest.SenderId, opt => opt.MapFrom(src => src.SenderID))
+            .ForMember(dest => dest.Timestamp, opt => opt.MapFrom(src => src.Timestamp));
+
+        CreateMap<ConversationListData, ConversationListItem>()
+            .ForMember(dest => dest.ConversationId, opt => opt.MapFrom(src => src.ConversationID))
+            .ForMember(dest => dest.ItemId, opt => opt.MapFrom(src => src.ItemID))
+            .ForMember(dest => dest.LastUpdated, opt => opt.MapFrom(src => src.LastUpdated))
+            .ForMember(dest => dest.LastMessage, opt => opt.MapFrom(src => src.LastMessage))
+            .ForMember(dest => dest.OtherUserId, opt => opt.MapFrom(src => src.OtherUserId))
+            .ForMember(dest => dest.OtherUserName, opt => opt.MapFrom(src => src.OtherUserName))
+            .ForMember(dest => dest.UnreadCount, opt => opt.MapFrom(src => src.UnreadCount));
     }
 }
