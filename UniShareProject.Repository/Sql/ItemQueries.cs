@@ -88,6 +88,22 @@ public static class ItemQueries
     public const string SoftDelete = @"
         UPDATE dbo.Items SET StatusID = 0 WHERE ItemID = @Id";
 
+    /// <summary>
+    /// Hard delete for admin operations - permanently removes the item and its images
+    /// </summary>
+    public const string HardDelete = @"
+        BEGIN TRANSACTION;
+        
+        -- Delete related item images first
+        DELETE FROM dbo.ItemImages WHERE ItemID = @Id;
+        
+        -- Delete the item
+        DELETE FROM dbo.Items WHERE ItemID = @Id;
+        
+        SELECT @@ROWCOUNT;
+        
+        COMMIT TRANSACTION;";
+
     #endregion
 
     #region Search with Pagination

@@ -209,6 +209,22 @@ public class ItemService : IItemService
         return _mapper.Map<ItemDto>(updatedItem);
     }
 
+    public async Task<bool> AdminDeleteAsync(int id, int adminId, CancellationToken ct)
+    {
+        // Step 1: Verify the item exists
+        var item = await _itemRepository.GetByIdAsync(id, ct);
+        if (item == null)
+        {
+            throw new KeyNotFoundException($"Item with ID {id} not found");
+        }
+
+        // Step 2: Perform hard delete (admin bypass - no authorization check needed here as controller handles admin auth)
+        var affectedRows = await _itemRepository.HardDeleteAsync(id, ct);
+        
+        // Step 3: Return success if item was deleted
+        return affectedRows > 0;
+    }
+
     // Legacy methods for backward compatibility
     public async Task<Item?> GetByIdAsync(int id)
     {

@@ -12,6 +12,11 @@ public interface IUserRepository
     Task<int> InsertAsync(User u, IUnitOfWork unitOfWork, CancellationToken ct);
     Task<User?> GetByEmailAsync(string email, IUnitOfWork unitOfWork, CancellationToken ct);
     
+    // New admin methods
+    Task<bool> UserExistsAsync(int id, CancellationToken ct);
+    Task<int> BanUserAsync(int id, CancellationToken ct);
+    Task<int> UnbanUserAsync(int id, CancellationToken ct);
+    
     // Legacy methods for backward compatibility with existing services
     Task<User?> GetByIdAsync(int id, IUnitOfWork unitOfWork);
     Task<User?> GetByEmailAsync(string email, IUnitOfWork unitOfWork);

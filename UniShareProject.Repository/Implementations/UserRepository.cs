@@ -64,6 +64,40 @@ public class UserRepository : IUserRepository
         return rowsAffected;
     }
 
+    // New admin methods
+    public async Task<bool> UserExistsAsync(int id, CancellationToken ct)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+        var count = await connection.QuerySingleAsync<int>(
+            UserQueries.UserExists,
+            new { Id = id },
+            commandTimeout: 30
+        );
+        return count > 0;
+    }
+
+    public async Task<int> BanUserAsync(int id, CancellationToken ct)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+        var rowsAffected = await connection.ExecuteScalarAsync<int>(
+            UserQueries.BanUser,
+            new { Id = id },
+            commandTimeout: 30
+        );
+        return rowsAffected;
+    }
+
+    public async Task<int> UnbanUserAsync(int id, CancellationToken ct)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+        var rowsAffected = await connection.ExecuteScalarAsync<int>(
+            UserQueries.UnbanUser,
+            new { Id = id },
+            commandTimeout: 30
+        );
+        return rowsAffected;
+    }
+
     // Legacy methods for backward compatibility
     public async Task<User?> GetByIdAsync(int id, IUnitOfWork unitOfWork)
     {

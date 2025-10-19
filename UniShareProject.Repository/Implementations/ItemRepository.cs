@@ -82,6 +82,23 @@ public class ItemRepository : IItemRepository
         }
     }
 
+    public async Task<int> HardDeleteAsync(int id, CancellationToken ct)
+    {
+        await using var unitOfWork = _unitOfWorkFactory.Create();
+        
+        try
+        {
+            var affectedRows = await unitOfWork.Connection.QuerySingleAsync<int>(ItemQueries.HardDelete, new { Id = id }, unitOfWork.Transaction);
+            await unitOfWork.CommitAsync();
+            return affectedRows;
+        }
+        catch
+        {
+            await unitOfWork.RollbackAsync();
+            throw;
+        }
+    }
+
     public async Task<PagedResult<Item>> SearchAsync(int? categoryId, byte? statusId, byte? conditionId, string? q, PageSpec page, CancellationToken ct)
     {
         await using var unitOfWork = _unitOfWorkFactory.Create();

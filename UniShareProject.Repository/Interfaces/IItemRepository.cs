@@ -11,6 +11,7 @@ public interface IItemRepository
     Task<int> UpdateStatusAsync(int id, byte statusId, CancellationToken ct);
     Task<PagedResult<Item>> SearchAsync(int? categoryId, byte? statusId, byte? conditionId, string? q, PageSpec page, CancellationToken ct);
     Task<(int SellerId, byte StatusId)?> GetSellerAndStatusAsync(int id, CancellationToken ct);
+    Task<int> HardDeleteAsync(int id, CancellationToken ct);
 
     // Existing methods for backward compatibility
     Task<Item?> GetByIdAsync(int id, IUnitOfWork unitOfWork);

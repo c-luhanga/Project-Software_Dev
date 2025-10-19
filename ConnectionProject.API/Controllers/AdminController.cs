@@ -115,19 +115,33 @@ public class AdminController : BaseApiController
             
             Logger.LogWarning("Admin {AdminId} attempting to delete item {ItemId}", adminId, id);
             
-            // Note: This would require implementing a DeleteAsync method in IItemService
-            // For now, return a placeholder response
-            return StatusCode(501, new { 
-                message = "Item deletion not implemented yet",
-                note = "Implement DeleteAsync method in IItemService and ItemRepository",
-                itemId = id,
-                adminId = adminId
-            });
+            var success = await _itemService.AdminDeleteAsync(id, adminId, ct);
+            
+            if (success)
+            {
+                Logger.LogWarning("Admin {AdminId} successfully deleted item {ItemId}", adminId, id);
+                return Ok(new { 
+                    message = "Item deleted successfully",
+                    itemId = id,
+                    adminId = adminId,
+                    deletedAt = DateTime.UtcNow
+                });
+            }
+            else
+            {
+                Logger.LogWarning("Admin {AdminId} failed to delete item {ItemId} - no rows affected", adminId, id);
+                return StatusCode(500, new { message = "Failed to delete item - no rows affected" });
+            }
+        }
+        catch (KeyNotFoundException ex)
+        {
+            Logger.LogWarning("Admin deletion failed - item not found: {Message}", ex.Message);
+            return NotFound(new { message = ex.Message });
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Error deleting item {ItemId}", id);
-            return StatusCode(500, new { message = "Internal server error occurred" });
+            return StatusCode(500, new { message = "Internal server error occurred during item deletion" });
         }
     }
 
