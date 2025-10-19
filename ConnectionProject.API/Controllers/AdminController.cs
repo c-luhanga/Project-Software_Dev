@@ -186,19 +186,33 @@ public class AdminController : BaseApiController
             
             Logger.LogWarning("Admin {AdminId} attempting to ban user {UserId}", adminId, id);
             
-            // Note: This would require implementing a BanUserAsync method in IUserService
-            // For now, return a placeholder response
-            return StatusCode(501, new { 
-                message = "User banning not implemented yet",
-                note = "Implement BanUserAsync method in IUserService and UserRepository",
-                userId = id,
-                adminId = adminId
-            });
+            var success = await _userService.BanUserAsync(id, adminId, ct);
+            
+            if (success)
+            {
+                Logger.LogWarning("Admin {AdminId} successfully banned user {UserId}", adminId, id);
+                return Ok(new { 
+                    message = "User banned successfully",
+                    userId = id,
+                    adminId = adminId,
+                    bannedAt = DateTime.UtcNow
+                });
+            }
+            else
+            {
+                Logger.LogWarning("Admin {AdminId} failed to ban user {UserId} - no rows affected", adminId, id);
+                return StatusCode(500, new { message = "Failed to ban user - no rows affected" });
+            }
+        }
+        catch (KeyNotFoundException ex)
+        {
+            Logger.LogWarning("Admin ban failed - user not found: {Message}", ex.Message);
+            return NotFound(new { message = ex.Message });
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Error banning user {UserId}", id);
-            return StatusCode(500, new { message = "Internal server error occurred" });
+            return StatusCode(500, new { message = "Internal server error occurred during user ban" });
         }
     }
 
@@ -241,19 +255,33 @@ public class AdminController : BaseApiController
             
             Logger.LogInformation("Admin {AdminId} attempting to unban user {UserId}", adminId, id);
             
-            // Note: This would require implementing an UnbanUserAsync method in IUserService
-            // For now, return a placeholder response
-            return StatusCode(501, new { 
-                message = "User unbanning not implemented yet",
-                note = "Implement UnbanUserAsync method in IUserService and UserRepository",
-                userId = id,
-                adminId = adminId
-            });
+            var success = await _userService.UnbanUserAsync(id, adminId, ct);
+            
+            if (success)
+            {
+                Logger.LogInformation("Admin {AdminId} successfully unbanned user {UserId}", adminId, id);
+                return Ok(new { 
+                    message = "User unbanned successfully",
+                    userId = id,
+                    adminId = adminId,
+                    unbannedAt = DateTime.UtcNow
+                });
+            }
+            else
+            {
+                Logger.LogWarning("Admin {AdminId} failed to unban user {UserId} - no rows affected", adminId, id);
+                return StatusCode(500, new { message = "Failed to unban user - no rows affected" });
+            }
+        }
+        catch (KeyNotFoundException ex)
+        {
+            Logger.LogWarning("Admin unban failed - user not found: {Message}", ex.Message);
+            return NotFound(new { message = ex.Message });
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Error unbanning user {UserId}", id);
-            return StatusCode(500, new { message = "Internal server error occurred" });
+            return StatusCode(500, new { message = "Internal server error occurred during user unban" });
         }
     }
 }

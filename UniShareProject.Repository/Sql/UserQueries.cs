@@ -51,6 +51,12 @@ public static class UserQueries
     public const string GetAll = @"
         SELECT * FROM dbo.Users WHERE IsDeleted = 0";
 
+    /// <summary>
+    /// Checks if a user exists by ID (for admin operations)
+    /// </summary>
+    public const string UserExists = @"
+        SELECT COUNT(1) FROM dbo.Users WHERE UserID = @Id AND IsDeleted = 0";
+
     #endregion
 
     #region Update Operations
@@ -71,6 +77,24 @@ public static class UserQueries
         UPDATE dbo.Users
         SET Phone=@phone, House=@house, ProfileImageURL=@profileImageUrl, LastSeen=SYSUTCDATETIME()
         WHERE UserID=@userId AND IsDeleted=0;
+        SELECT @@ROWCOUNT;";
+
+    /// <summary>
+    /// Bans a user by setting IsBanned to 1
+    /// </summary>
+    public const string BanUser = @"
+        UPDATE dbo.Users 
+        SET IsBanned = 1, LastSeen = SYSUTCDATETIME() 
+        WHERE UserID = @Id AND IsDeleted = 0;
+        SELECT @@ROWCOUNT;";
+
+    /// <summary>
+    /// Unbans a user by setting IsBanned to 0
+    /// </summary>
+    public const string UnbanUser = @"
+        UPDATE dbo.Users 
+        SET IsBanned = 0, LastSeen = SYSUTCDATETIME() 
+        WHERE UserID = @Id AND IsDeleted = 0;
         SELECT @@ROWCOUNT;";
 
     /// <summary>

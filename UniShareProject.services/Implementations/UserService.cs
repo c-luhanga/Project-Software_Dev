@@ -66,4 +66,32 @@ public class UserService : IUserService
 
         return _mapper.Map<UserDto>(updatedUser);
     }
+
+    public async Task<bool> BanUserAsync(int userId, int adminId, CancellationToken ct)
+    {
+        // Check if user exists
+        var userExists = await _userRepository.UserExistsAsync(userId, ct);
+        if (!userExists)
+        {
+            throw new KeyNotFoundException($"User with ID {userId} not found");
+        }
+
+        // Ban the user
+        var rowsAffected = await _userRepository.BanUserAsync(userId, ct);
+        return rowsAffected > 0;
+    }
+
+    public async Task<bool> UnbanUserAsync(int userId, int adminId, CancellationToken ct)
+    {
+        // Check if user exists
+        var userExists = await _userRepository.UserExistsAsync(userId, ct);
+        if (!userExists)
+        {
+            throw new KeyNotFoundException($"User with ID {userId} not found");
+        }
+
+        // Unban the user
+        var rowsAffected = await _userRepository.UnbanUserAsync(userId, ct);
+        return rowsAffected > 0;
+    }
 }
