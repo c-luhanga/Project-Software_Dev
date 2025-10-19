@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using UniShareProject.services.DTOs;
 using UniShareProject.services.Interfaces;
+using UniShareProject.Repository.Models;
 
 namespace ConnectionProject.API.Controllers;
 
@@ -26,13 +27,19 @@ public class MessagesController : ControllerBase
     /// <summary>
     /// Get all conversations for the current user
     /// </summary>
+    /// <param name="page">Page number (default: 1)</param>
+    /// <param name="pageSize">Items per page (default: 20)</param>
     /// <param name="ct">Cancellation token</param>
-    /// <returns>List of conversation items</returns>
+    /// <returns>Paged list of conversation items</returns>
     [HttpGet("conversations")]
-    public async Task<ActionResult<IEnumerable<ConversationListItem>>> GetConversations(CancellationToken ct)
+    public async Task<ActionResult<PagedResult<ConversationListItem>>> GetConversations(
+        [FromQuery] int page = 1, 
+        [FromQuery] int pageSize = 20, 
+        CancellationToken ct = default)
     {
         var userId = GetCurrentUserId();
-        var conversations = await _messagingService.GetUserConversationsAsync(userId, ct);
+        var pageSpec = new PageSpec(page, pageSize);
+        var conversations = await _messagingService.ListForUserAsync(userId, pageSpec, ct);
         return Ok(conversations);
     }
 
@@ -43,10 +50,10 @@ public class MessagesController : ControllerBase
     /// <param name="ct">Cancellation token</param>
     /// <returns>The conversation ID</returns>
     [HttpPost("conversations")]
-    public async Task<ActionResult<int>> StartConversation([FromBody] StartConversationRequest request, CancellationToken ct)
+    public async Task<ActionResult<int>> StartConversation([FromBody] StartConversationRequest request, CancellationToken ct = default)
     {
         var userId = GetCurrentUserId();
-        var conversationId = await _messagingService.StartConversationAsync(userId, request, ct);
+        var conversationId = await _messagingService.StartConversationAsync(request, userId, ct);
         return Ok(new { ConversationId = conversationId });
     }
 
@@ -54,16 +61,23 @@ public class MessagesController : ControllerBase
     /// Get all messages in a conversation
     /// </summary>
     /// <param name="conversationId">ID of the conversation</param>
+    /// <param name="page">Page number (default: 1)</param>
+    /// <param name="pageSize">Items per page (default: 50)</param>
     /// <param name="ct">Cancellation token</param>
-    /// <returns>List of messages</returns>
+    /// <returns>Paged list of messages</returns>
     [HttpGet("conversations/{conversationId:int}/messages")]
-    public async Task<ActionResult<IEnumerable<MessageDto>>> GetConversationMessages(int conversationId, CancellationToken ct)
+    public async Task<ActionResult<PagedResult<MessageDto>>> GetConversationMessages(
+        int conversationId, 
+        [FromQuery] int page = 1, 
+        [FromQuery] int pageSize = 50, 
+        CancellationToken ct = default)
     {
         var userId = GetCurrentUserId();
+        var pageSpec = new PageSpec(page, pageSize);
         
         try
         {
-            var messages = await _messagingService.GetConversationMessagesAsync(conversationId, userId, ct);
+            var messages = await _messagingService.GetConversationAsync(conversationId, pageSpec, userId, ct);
             return Ok(messages);
         }
         catch (UnauthorizedAccessException)
@@ -79,39 +93,19 @@ public class MessagesController : ControllerBase
     /// <param name="ct">Cancellation token</param>
     /// <returns>The sent message</returns>
     [HttpPost("messages")]
-    public async Task<ActionResult<MessageDto>> SendMessage([FromBody] SendMessageRequest request, CancellationToken ct)
+    public async Task<ActionResult<MessageDto>> SendMessage([FromBody] SendMessageRequest request, CancellationToken ct = default)
     {
         var userId = GetCurrentUserId();
         
         try
         {
-            var message = await _messagingService.SendMessageAsync(userId, request, ct);
+            var message = await _messagingService.SendAsync(request, userId, ct);
             return Ok(message);
         }
         catch (UnauthorizedAccessException)
         {
             return Forbid("You are not a participant in this conversation.");
         }
-    }
-
-    /// <summary>
-    /// Mark all messages in a conversation as read
-    /// </summary>
-    /// <param name="conversationId">ID of the conversation</param>
-    /// <param name="ct">Cancellation token</param>
-    /// <returns>Success status</returns>
-    [HttpPut("conversations/{conversationId:int}/read")]
-    public async Task<ActionResult> MarkConversationAsRead(int conversationId, CancellationToken ct)
-    {
-        var userId = GetCurrentUserId();
-        var success = await _messagingService.MarkConversationAsReadAsync(conversationId, userId, ct);
-        
-        if (!success)
-        {
-            return NotFound("Conversation not found or you are not a participant.");
-        }
-        
-        return Ok(new { Message = "Conversation marked as read" });
     }
 
     /// <summary>

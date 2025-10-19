@@ -1,4 +1,5 @@
 using UniShareProject.services.DTOs;
+using UniShareProject.Repository.Models;
 
 namespace UniShareProject.services.Interfaces;
 
@@ -10,44 +11,37 @@ public interface IMessagingService
     /// <summary>
     /// Start a new conversation with another user
     /// </summary>
-    /// <param name="currentUserId">ID of the current user</param>
-    /// <param name="request">Start conversation request</param>
+    /// <param name="req">Start conversation request</param>
+    /// <param name="starterUserId">ID of the user starting the conversation</param>
     /// <param name="ct">Cancellation token</param>
     /// <returns>The conversation ID</returns>
-    Task<int> StartConversationAsync(int currentUserId, StartConversationRequest request, CancellationToken ct);
+    Task<int> StartConversationAsync(StartConversationRequest req, int starterUserId, CancellationToken ct);
 
     /// <summary>
     /// Send a message in an existing conversation
     /// </summary>
-    /// <param name="currentUserId">ID of the current user</param>
-    /// <param name="request">Send message request</param>
+    /// <param name="req">Send message request</param>
+    /// <param name="senderId">ID of the user sending the message</param>
     /// <param name="ct">Cancellation token</param>
     /// <returns>The sent message</returns>
-    Task<MessageDto> SendMessageAsync(int currentUserId, SendMessageRequest request, CancellationToken ct);
+    Task<MessageDto> SendAsync(SendMessageRequest req, int senderId, CancellationToken ct);
 
     /// <summary>
-    /// Get all conversations for a user
-    /// </summary>
-    /// <param name="userId">ID of the user</param>
-    /// <param name="ct">Cancellation token</param>
-    /// <returns>List of conversation items</returns>
-    Task<IEnumerable<ConversationListItem>> GetUserConversationsAsync(int userId, CancellationToken ct);
-
-    /// <summary>
-    /// Get all messages in a conversation
+    /// Get paged messages for a conversation
     /// </summary>
     /// <param name="conversationId">ID of the conversation</param>
+    /// <param name="page">Pagination specification</param>
     /// <param name="userId">ID of the current user (for authorization)</param>
     /// <param name="ct">Cancellation token</param>
-    /// <returns>List of messages</returns>
-    Task<IEnumerable<MessageDto>> GetConversationMessagesAsync(int conversationId, int userId, CancellationToken ct);
+    /// <returns>Paged list of messages</returns>
+    Task<PagedResult<MessageDto>> GetConversationAsync(int conversationId, PageSpec page, int userId, CancellationToken ct);
 
     /// <summary>
-    /// Mark messages in a conversation as read
+    /// Get paged conversations for a user's inbox
     /// </summary>
-    /// <param name="conversationId">ID of the conversation</param>
-    /// <param name="userId">ID of the user marking messages as read</param>
+    /// <param name="userId">ID of the user</param>
+    /// <param name="page">Pagination specification</param>
     /// <param name="ct">Cancellation token</param>
-    /// <returns>True if successful</returns>
-    Task<bool> MarkConversationAsReadAsync(int conversationId, int userId, CancellationToken ct);
+    /// <returns>Paged list of conversation items</returns>
+    Task<PagedResult<ConversationListItem>> ListForUserAsync(int userId, PageSpec page, CancellationToken ct);
 }

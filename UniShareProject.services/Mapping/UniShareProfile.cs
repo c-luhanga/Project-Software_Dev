@@ -57,5 +57,13 @@ public class UniShareProfile : Profile
             .ForMember(dest => dest.OtherUserId, opt => opt.MapFrom(src => src.OtherUserId))
             .ForMember(dest => dest.OtherUserName, opt => opt.MapFrom(src => src.OtherUserName))
             .ForMember(dest => dest.UnreadCount, opt => opt.MapFrom(src => src.UnreadCount));
+
+        // Generic PagedResult mapping for messages
+        CreateMap<PagedResult<Message>, PagedResult<MessageDto>>()
+            .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.Items));
+
+        // Generic PagedResult mapping for conversations  
+        CreateMap<PagedResult<ConversationListData>, PagedResult<ConversationListItem>>()
+            .ForMember(dest => dest.Items, opt => opt.MapFrom(src => src.Items));
     }
 }
