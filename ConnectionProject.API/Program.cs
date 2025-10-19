@@ -104,6 +104,10 @@ builder.Services.AddScoped<IItemImageRepository, ItemImageRepository>();
 builder.Services.AddScoped<IConversationRepository, ConversationRepository>();
 builder.Services.AddScoped<IMessageRepository, MessageRepository>();
 
+// Register new abstractions interfaces
+builder.Services.AddScoped<UniShareProject.Repository.Abstractions.IConversationRepository, ConversationRepository>();
+builder.Services.AddScoped<UniShareProject.Repository.Abstractions.IMessageRepository, MessageRepository>();
+
 // Services - Updated to use the new IAuthService interface and ItemService from Implementations
 builder.Services.AddScoped<IAuthService, UniShareProject.services.Implementations.AuthService>();
 builder.Services.AddScoped<IItemService, UniShareProject.services.Implementations.ItemService>();
