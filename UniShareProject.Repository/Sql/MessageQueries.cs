@@ -16,6 +16,14 @@ public static class MessageQueries
         SELECT CAST(SCOPE_IDENTITY() as int)";
 
     /// <summary>
+    /// Inserts a new message with SYSUTCDATETIME() and returns the generated ID
+    /// </summary>
+    public const string InsertWithSysDate = @"
+        INSERT INTO dbo.Messages (ConversationID, SenderID, Content, Timestamp)
+        VALUES (@ConversationID, @SenderID, @Content, SYSUTCDATETIME());
+        SELECT CAST(SCOPE_IDENTITY() as int)";
+
+    /// <summary>
     /// Inserts a message read record
     /// </summary>
     public const string InsertRead = @"
@@ -47,6 +55,54 @@ public static class MessageQueries
         WHERE m.ConversationID = @ConversationId 
         ORDER BY m.Timestamp";
 
+    /// <summary>
+    /// Gets count of messages for a conversation
+    /// </summary>
+    public const string CountByConversation = @"
+        SELECT COUNT(*)
+        FROM dbo.Messages
+        WHERE ConversationID = @ConversationId";
+
+    /// <summary>
+    /// Gets paged messages for a conversation with read status
+    /// </summary>
+    public const string GetByConversationPaged = @"
+        SELECT 
+            m.MessageID,
+            m.ConversationID,
+            m.SenderID,
+            m.Content,
+            m.Timestamp,
+            CASE WHEN mr.MessageID IS NOT NULL THEN 1 ELSE 0 END as IsRead
+        FROM dbo.Messages m
+        LEFT JOIN dbo.MessageReads mr ON m.MessageID = mr.MessageID
+        WHERE m.ConversationID = @ConversationId
+        ORDER BY m.Timestamp ASC
+        OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY";
+
+    /// <summary>
+    /// Gets count and paged messages for a conversation in a single query using QueryMultiple
+    /// </summary>
+    public const string CountAndPageByConversation = @"
+        -- Count query
+        SELECT COUNT(*)
+        FROM dbo.Messages
+        WHERE ConversationID = @ConversationId;
+
+        -- Paged results query
+        SELECT 
+            m.MessageID,
+            m.ConversationID,
+            m.SenderID,
+            m.Content,
+            m.Timestamp,
+            CASE WHEN mr.MessageID IS NOT NULL THEN 1 ELSE 0 END as IsRead
+        FROM dbo.Messages m
+        LEFT JOIN dbo.MessageReads mr ON m.MessageID = mr.MessageID
+        WHERE m.ConversationID = @ConversationId
+        ORDER BY m.Timestamp ASC
+        OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY";
+
     #endregion
 
     #region Update Operations
@@ -65,6 +121,14 @@ public static class MessageQueries
     public const string UpdateConversationLastMessage = @"
         UPDATE dbo.Conversations 
         SET LastMessage = @Content, LastUpdated = @Timestamp 
+        WHERE ConversationID = @ConversationID";
+
+    /// <summary>
+    /// Updates conversation's last message and timestamp with SYSUTCDATETIME()
+    /// </summary>
+    public const string UpdateConversationLastMessageWithSysDate = @"
+        UPDATE dbo.Conversations 
+        SET LastMessage = @Content, LastUpdated = SYSUTCDATETIME()
         WHERE ConversationID = @ConversationID";
 
     /// <summary>

@@ -28,13 +28,8 @@ public class MessageRepository :
 
         try
         {
-            // Insert message
-            const string insertMessageSql = @"
-                INSERT INTO dbo.Messages (ConversationID, SenderID, Content, Timestamp)
-                VALUES (@ConversationID, @SenderID, @Content, SYSUTCDATETIME());
-                SELECT CAST(SCOPE_IDENTITY() as int)";
-
-            var messageId = await connection.QuerySingleAsync<int>(insertMessageSql, 
+            // Insert message using query from MessageQueries
+            var messageId = await connection.QuerySingleAsync<int>(MessageQueries.InsertWithSysDate, 
                 new { 
                     ConversationID = msg.ConversationID, 
                     SenderID = msg.SenderID, 
@@ -42,13 +37,8 @@ public class MessageRepository :
                 }, 
                 transaction);
 
-            // Update conversation's last message and timestamp
-            const string updateConversationSql = @"
-                UPDATE dbo.Conversations 
-                SET LastMessage = @Content, LastUpdated = SYSUTCDATETIME()
-                WHERE ConversationID = @ConversationID";
-
-            await connection.ExecuteAsync(updateConversationSql, 
+            // Update conversation's last message and timestamp using query from MessageQueries
+            await connection.ExecuteAsync(MessageQueries.UpdateConversationLastMessageWithSysDate, 
                 new { 
                     Content = msg.Content, 
                     ConversationID = msg.ConversationID 
@@ -70,27 +60,8 @@ public class MessageRepository :
         using var connection = _connectionFactory.CreateConnection();
         await connection.OpenAsync(ct);
 
-        const string countAndPageSql = @"
-            -- Count query
-            SELECT COUNT(*)
-            FROM dbo.Messages
-            WHERE ConversationID = @ConversationId;
-
-            -- Paged results query
-            SELECT 
-                m.MessageID,
-                m.ConversationID,
-                m.SenderID,
-                m.Content,
-                m.Timestamp,
-                CASE WHEN mr.MessageID IS NOT NULL THEN 1 ELSE 0 END as IsRead
-            FROM dbo.Messages m
-            LEFT JOIN dbo.MessageReads mr ON m.MessageID = mr.MessageID
-            WHERE m.ConversationID = @ConversationId
-            ORDER BY m.Timestamp ASC
-            OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY";
-
-        using var multi = await connection.QueryMultipleAsync(countAndPageSql, 
+        // Use query from MessageQueries for count and paged results
+        using var multi = await connection.QueryMultipleAsync(MessageQueries.CountAndPageByConversation, 
             new { ConversationId = conversationId, Offset = page.Offset, PageSize = page.PageSize });
 
         var total = await multi.ReadSingleAsync<int>();

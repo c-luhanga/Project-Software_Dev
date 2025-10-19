@@ -28,19 +28,9 @@ public class ConversationRepository :
 
         try
         {
-            // Find existing conversation with same participants and ItemId (including NULL)
-            const string findExistingSql = @"
-                SELECT TOP 1 c.ConversationID
-                FROM dbo.Conversations c
-                INNER JOIN dbo.ConversationParticipants cp1 ON c.ConversationID = cp1.ConversationID
-                INNER JOIN dbo.ConversationParticipants cp2 ON c.ConversationID = cp2.ConversationID
-                WHERE (c.ItemID = @ItemId OR (c.ItemID IS NULL AND @ItemId IS NULL))
-                AND cp1.UserID = @UserA 
-                AND cp2.UserID = @UserB
-                AND cp1.UserID != cp2.UserID";
-
+            // Find existing conversation using query from ConversationQueries
             var existingConversationId = await connection.QueryFirstOrDefaultAsync<int?>(
-                findExistingSql, 
+                ConversationQueries.FindExistingConversationForEnsure, 
                 new { ItemId = itemId, UserA = userA, UserB = userB }, 
                 transaction);
 
@@ -50,26 +40,17 @@ public class ConversationRepository :
                 return existingConversationId.Value;
             }
 
-            // Create new conversation
-            const string insertConversationSql = @"
-                INSERT INTO dbo.Conversations (ItemID, LastMessage, LastUpdated, CreatedAt)
-                VALUES (@ItemId, NULL, SYSUTCDATETIME(), SYSUTCDATETIME());
-                SELECT CAST(SCOPE_IDENTITY() as int)";
-
+            // Create new conversation using query from ConversationQueries
             var conversationId = await connection.QuerySingleAsync<int>(
-                insertConversationSql, 
+                ConversationQueries.InsertWithSysDate, 
                 new { ItemId = itemId }, 
                 transaction);
 
-            // Insert participants
-            const string insertParticipantSql = @"
-                INSERT INTO dbo.ConversationParticipants (ConversationID, UserID)
-                VALUES (@ConversationId, @UserId)";
-
-            await connection.ExecuteAsync(insertParticipantSql, 
+            // Insert participants using query from ConversationQueries
+            await connection.ExecuteAsync(ConversationQueries.InsertParticipant, 
                 new { ConversationId = conversationId, UserId = userA }, transaction);
             
-            await connection.ExecuteAsync(insertParticipantSql, 
+            await connection.ExecuteAsync(ConversationQueries.InsertParticipant, 
                 new { ConversationId = conversationId, UserId = userB }, transaction);
 
             await transaction.CommitAsync(ct);
@@ -87,12 +68,8 @@ public class ConversationRepository :
         using var connection = _connectionFactory.CreateConnection();
         await connection.OpenAsync(ct);
 
-        const string sql = @"
-            SELECT COUNT(1) 
-            FROM dbo.ConversationParticipants 
-            WHERE ConversationID = @ConversationId AND UserID = @UserId";
-
-        var count = await connection.QuerySingleAsync<int>(sql, 
+        // Use query from ConversationQueries
+        var count = await connection.QuerySingleAsync<int>(ConversationQueries.CheckUserParticipation, 
             new { ConversationId = conversationId, UserId = userId });
 
         return count > 0;
@@ -103,38 +80,8 @@ public class ConversationRepository :
         using var connection = _connectionFactory.CreateConnection();
         await connection.OpenAsync(ct);
 
-        const string countAndPageSql = @"
-            -- Count query
-            SELECT COUNT(DISTINCT c.ConversationID)
-            FROM dbo.Conversations c
-            INNER JOIN dbo.ConversationParticipants cp ON c.ConversationID = cp.ConversationID
-            WHERE cp.UserID = @UserId;
-
-            -- Paged results query
-            SELECT 
-                c.ConversationID,
-                c.ItemID,
-                c.LastMessage,
-                c.LastUpdated,
-                otherUser.UserID as OtherUserId,
-                otherUser.FirstName + ' ' + otherUser.LastName as OtherUserName,
-                ISNULL(unread.UnreadCount, 0) as UnreadCount
-            FROM dbo.Conversations c
-            INNER JOIN dbo.ConversationParticipants cp ON c.ConversationID = cp.ConversationID
-            INNER JOIN dbo.ConversationParticipants otherCp ON c.ConversationID = otherCp.ConversationID
-            INNER JOIN dbo.Users otherUser ON otherCp.UserID = otherUser.UserID
-            LEFT JOIN (
-                SELECT m.ConversationID, COUNT(*) as UnreadCount
-                FROM dbo.Messages m
-                LEFT JOIN dbo.MessageReads mr ON m.MessageID = mr.MessageID AND mr.UserID = @UserId
-                WHERE mr.MessageID IS NULL AND m.SenderID != @UserId
-                GROUP BY m.ConversationID
-            ) unread ON c.ConversationID = unread.ConversationID
-            WHERE cp.UserID = @UserId AND otherCp.UserID != @UserId
-            ORDER BY c.LastUpdated DESC
-            OFFSET @Offset ROWS FETCH NEXT @PageSize ROWS ONLY";
-
-        using var multi = await connection.QueryMultipleAsync(countAndPageSql, 
+        // Use query from ConversationQueries for count and paged results
+        using var multi = await connection.QueryMultipleAsync(ConversationQueries.CountAndPageConversationsByUserId, 
             new { UserId = userId, Offset = page.Offset, PageSize = page.PageSize });
 
         var total = await multi.ReadSingleAsync<int>();
