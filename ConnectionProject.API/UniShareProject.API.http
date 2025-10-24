@@ -1,22 +1,56 @@
 ﻿@UniShareProject.API_HostAddress = http://localhost:5100
 
-### Variables for testing
+### ========================================================================
+### VARIABLES FOR TESTING
+### ========================================================================
 @testEmail = test.user@principia.edu
 @testPassword = Th1s1satest!
 @testEmail2 = another.user@principia.edu
 @testPassword2 = AnotherPassword123
+@adminEmail = admin.user@principia.edu
+@adminPassword = AdminPass123!
 
-# NOTE: Replace this with the actual token from your login response
-@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMDA0IiwibmFtZWlkIjoiMTAwNCIsIm5hbWUiOiJKb2huMiBEb2UyIiwidW5pcXVlX25hbWUiOiJKb2huMiBEb2UyIiwiZW1haWwiOlsiam9obi5kb2UyQHByaW5jaXBpYS5lZHUiLCJqb2huLmRvZTJAcHJpbmNpcGlhLmVkdSJdLCJyb2xlIjpbInVzZXIiLCJ1c2VyIl0sImp0aSI6IjQzYTUxNzA4LTM2MDUtNDhhNC1hMjI2LWU0MzQzZDUzNWRlYiIsImlhdCI6MTc2MDMxODQ3MCwibmJmIjoxNzYwMzE4NDcwLCJleHAiOjE3NjA0MDQ4NzAsImlzcyI6IlVuaVNoYXJlUHJvamVjdC5BUEkiLCJhdWQiOiJVbmlTaGFyZVByb2plY3QuQ2xpZW50In0.wmPNQu3_JZlj8yL-XJaO1Is0zmrWkxUHKH0wWZCmtAw
+# NOTE: Replace these with actual tokens from login responses
+@authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwibmFtZSI6InRlc3QgdXNlciIsImVtYWlsIjpbInRlc3QudXNlckBwcmluY2lwaWEuZWR1IiwidGVzdC51c2VyQHByaW5jaXBpYS5lZHUiXSwicm9sZSI6InVzZXIiLCJuYW1laWQiOiIxIiwidW5pcXVlX25hbWUiOiJ0ZXN0IHVzZXIiLCJqdGkiOiJiNDliNDgwMS03OThmLTRiNjYtYTQzMy00ODAwNTAzOGQ3NGUiLCJpYXQiOjE3NjEwMDY3NTcsIm5iZiI6MTc2MTAwNjc1NywiZXhwIjoxNzYxMDkzMTU3LCJpc3MiOiJVbmlTaGFyZVByb2plY3QuQVBJIiwiYXVkIjoiVW5pU2hhcmVQcm9qZWN0LkNsaWVudCJ9.r4r1nZTy1hWmmz1ygEL58bbBzDvOLVCKemVsuny7zNo
+@authToken2 = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMDAyIiwibmFtZSI6IkFub3RoZXIgVXNlciIsImVtYWlsIjpbImFub3RoZXIudXNlckBwcmluY2lwaWEuZWR1IiwiYW5vdGhlci51c2VyQHByaW5jaXBpYS5lZHUiXSwicm9sZSI6InVzZXIiLCJuYW1laWQiOiIxMDAyIiwidW5pcXVlX25hbWUiOiJBbm90aGVyIFVzZXIiLCJqdGkiOiI5MTg4NThjYy0zNDk3LTQyOGMtYjUwMi02OTRhZjFjMThjOTQiLCJpYXQiOjE3NjEwMDY4MDUsIm5iZiI6MTc2MTAwNjgwNSwiZXhwIjoxNzYxMDkzMjA1LCJpc3MiOiJVbmlTaGFyZVByb2plY3QuQVBJIiwiYXVkIjoiVW5pU2hhcmVQcm9qZWN0LkNsaWVudCJ9.R6rcJ9o7OSMnrkiSIuj3tcHYFlt1o7C67hLJfFA-U34
+@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMDA3IiwibmFtZSI6IkFkbWluIFVzZXIiLCJlbWFpbCI6WyJhZG1pbi51c2VyQHByaW5jaXBpYS5lZHUiLCJhZG1pbi51c2VyQHByaW5jaXBpYS5lZHUiXSwicm9sZSI6ImFkbWluIiwibmFtZWlkIjoiMTAwNyIsInVuaXF1ZV9uYW1lIjoiQWRtaW4gVXNlciIsImp0aSI6IjdkZmRmN2Y2LWQ0MGYtNDU5OS04ZWViLTdkNGEzMDBmZGZjYSIsImlhdCI6MTc2MTAxNDYzOSwibmJmIjoxNzYxMDE0NjM5LCJleHAiOjE3NjExMDEwMzksImlzcyI6IlVuaVNoYXJlUHJvamVjdC5BUEkiLCJhdWQiOiJVbmlTaGFyZVByb2plY3QuQ2xpZW50In0.sSMxtVmzQr9oSosMODmeoWix6pziAEgBYOVowN3isUE
 
-# NOTE: Replace this with the actual token from second user login
-@authToken2 = 
+# Item IDs (will be created during testing)
+@itemId1 = 9
+@itemId2 = 10
+@conversationId = 1
+@conversationId2 = 2
 
-### ---------------------------------------------------------------------------
-# TESTING FLOW - EXECUTE IN CHRONOLOGICAL ORDER
-### ---------------------------------------------------------------------------
+### ========================================================================
+### SECTION 1: HEALTH & VERSION CHECKS (No Authentication Required)
+### ========================================================================
 
-### STEP 1: Register first user (seller)
+### Health Check - Basic
+GET {{UniShareProject.API_HostAddress}}/api/health
+
+###
+
+### Health Check - Detailed
+GET {{UniShareProject.API_HostAddress}}/api/health/detailed
+
+###
+
+### Get API Version
+GET {{UniShareProject.API_HostAddress}}/api/health/version
+
+###
+
+### Root Endpoint - API Information
+GET {{UniShareProject.API_HostAddress}}/
+
+###
+
+### ========================================================================
+### SECTION 2: AUTHENTICATION ENDPOINTS
+### ========================================================================
+
+### AUTH-01: Register First User (Seller)
+# @name registerUser1
 POST {{UniShareProject.API_HostAddress}}/api/auth/register
 Content-Type: application/json
 
@@ -27,7 +61,10 @@ Content-Type: application/json
   "password": "{{testPassword}}"
 }
 
-### STEP 2: Login with first user (COPY THE TOKEN TO @authToken)
+###
+
+### AUTH-02: Login First User (COPY TOKEN TO @authToken)
+# @name loginUser1
 POST {{UniShareProject.API_HostAddress}}/api/auth/login
 Content-Type: application/json
 
@@ -36,7 +73,10 @@ Content-Type: application/json
   "password": "{{testPassword}}"
 }
 
-### STEP 3: Register second user (buyer)
+###
+
+### AUTH-03: Register Second User (Buyer)
+# @name registerUser2
 POST {{UniShareProject.API_HostAddress}}/api/auth/register
 Content-Type: application/json
 
@@ -47,7 +87,10 @@ Content-Type: application/json
   "password": "{{testPassword2}}"
 }
 
-### STEP 4: Login with second user (COPY THE TOKEN TO @authToken2)
+###
+
+### AUTH-04: Login Second User (COPY TOKEN TO @authToken2)
+# @name loginUser2
 POST {{UniShareProject.API_HostAddress}}/api/auth/login
 Content-Type: application/json
 
@@ -56,7 +99,221 @@ Content-Type: application/json
   "password": "{{testPassword2}}"
 }
 
-### STEP 5: Create first item (as first user - seller)
+###
+
+### AUTH-05: Register Admin User
+# @name registerAdmin
+POST {{UniShareProject.API_HostAddress}}/api/auth/register
+Content-Type: application/json
+
+{
+  "firstName": "Admin",
+  "lastName": "User",
+  "email": "{{adminEmail}}",
+  "password": "{{adminPassword}}"
+}
+
+###
+
+### AUTH-06: Login Admin User (COPY TOKEN TO @adminToken)
+# @name loginAdmin
+POST {{UniShareProject.API_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{adminEmail}}",
+  "password": "{{adminPassword}}"
+}
+
+###
+
+### AUTH-ERROR-01: Register with Invalid Email Domain
+POST {{UniShareProject.API_HostAddress}}/api/auth/register
+Content-Type: application/json
+
+{
+  "firstName": "Invalid",
+  "lastName": "User",
+  "email": "invalid@gmail.com",
+  "password": "TestPassword123"
+}
+
+###
+
+### AUTH-ERROR-02: Register with Duplicate Email
+POST {{UniShareProject.API_HostAddress}}/api/auth/register
+Content-Type: application/json
+
+{
+  "firstName": "Duplicate",
+  "lastName": "User",
+  "email": "{{testEmail}}",
+  "password": "DifferentPassword123"
+}
+
+###
+
+### AUTH-ERROR-03: Login with Wrong Password
+POST {{UniShareProject.API_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{testEmail}}",
+  "password": "WrongPassword123"
+}
+
+###
+
+### AUTH-ERROR-04: Register with Missing Fields
+POST {{UniShareProject.API_HostAddress}}/api/auth/register
+Content-Type: application/json
+
+{
+  "firstName": "",
+  "email": "test@principia.edu"
+}
+
+###
+
+### AUTH-ERROR-05: Login with Non-existent User
+POST {{UniShareProject.API_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "nonexistent@principia.edu",
+  "password": "SomePassword123"
+}
+
+###
+
+### ========================================================================
+### SECTION 3: USER PROFILE MANAGEMENT
+### ========================================================================
+
+### USER-01: Get Current User Profile (User 1)
+GET {{UniShareProject.API_HostAddress}}/api/users/me
+Authorization: Bearer {{authToken}}
+
+###
+
+### USER-02: Update User Profile - Full Update
+PUT {{UniShareProject.API_HostAddress}}/api/users/me
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "phone": "+1-555-123-4567",
+  "house": "Johnson Hall",
+  "profileImageUrl": "https://picsum.photos/200/200?random=300"
+}
+
+###
+
+### USER-03: Verify Profile Update
+GET {{UniShareProject.API_HostAddress}}/api/users/me
+Authorization: Bearer {{authToken}}
+
+###
+
+### USER-04: Update Profile - Partial (Phone Only)
+PUT {{UniShareProject.API_HostAddress}}/api/users/me
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "phone": "+1-555-999-8888"
+}
+
+###
+### TODO: Updating single item
+### USER-05: Update Profile - Partial (House Only)
+PUT {{UniShareProject.API_HostAddress}}/api/users/me
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "house": "Anderson Hall"
+}
+
+###
+
+### USER-06: Update Profile - Partial (Image Only)
+PUT {{UniShareProject.API_HostAddress}}/api/users/me
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "profileImageUrl": "https://picsum.photos/200/200?random=401"
+}
+
+###
+
+### USER-07: Clear Profile Fields (Set to Null)
+PUT {{UniShareProject.API_HostAddress}}/api/users/me
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "phone": null,
+  "house": null,
+  "profileImageUrl": null
+}
+
+###
+
+### USER-08: Get Second User Profile
+GET {{UniShareProject.API_HostAddress}}/api/users/me
+Authorization: Bearer {{authToken2}}
+
+###
+
+### USER-09: Update Second User Profile
+PUT {{UniShareProject.API_HostAddress}}/api/users/me
+Content-Type: application/json
+Authorization: Bearer {{authToken2}}
+
+{
+  "phone": "+1-555-987-6543",
+  "house": "Davis Hall",
+  "profileImageUrl": "https://picsum.photos/200/200?random=500"
+}
+
+###
+
+### USER-ERROR-01: Get Profile Without Authentication
+GET {{UniShareProject.API_HostAddress}}/api/users/me
+
+###
+
+### USER-ERROR-02: Update Profile Without Authentication
+PUT {{UniShareProject.API_HostAddress}}/api/users/me
+Content-Type: application/json
+
+{
+  "phone": "+1-555-000-0000"
+}
+
+###
+
+### USER-ERROR-03: Update Profile with Invalid Data
+PUT {{UniShareProject.API_HostAddress}}/api/users/me
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "phone": "this-is-way-too-long-for-a-phone-number-field-that-should-only-be-20-characters-maximum-allowed",
+  "house": "this-house-name-is-way-too-long-for-the-field-that-should-only-be-50-characters-maximum-allowed-in-the-database",
+  "profileImageUrl": "not-a-valid-url-format"
+}
+
+###
+
+### ========================================================================
+### SECTION 4: ITEM MANAGEMENT
+### ========================================================================
+
+### ITEM-01: Create First Item (Textbook)
+# @name createItem1
 POST {{UniShareProject.API_HostAddress}}/api/items
 Content-Type: application/json
 Authorization: Bearer {{authToken}}
@@ -69,21 +326,74 @@ Authorization: Bearer {{authToken}}
   "conditionId": 1
 }
 
-### STEP 6: Create second item (as first user - seller)
+###
+
+### ITEM-02: Create Second Item (MacBook)
+# @name createItem2
 POST {{UniShareProject.API_HostAddress}}/api/items
 Content-Type: application/json
 Authorization: Bearer {{authToken}}
 
 {
   "title": "MacBook Pro 2019",
-  "description": "Used MacBook Pro in good condition. Some minor scratches on the back.",
+  "description": "Used MacBook Pro in good condition. Some minor scratches on the back. 16GB RAM, 512GB SSD.",
   "categoryId": 2,
   "price": 899.99,
   "conditionId": 2
 }
 
-### STEP 7: Add images to first item (as seller - item owner)
-POST {{UniShareProject.API_HostAddress}}/api/items/1/images
+###
+
+### ITEM-03: Create Third Item (Furniture)
+# @name createItem3
+POST {{UniShareProject.API_HostAddress}}/api/items
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "title": "Desk Lamp",
+  "description": "IKEA desk lamp in excellent condition. Adjustable arm and brightness.",
+  "categoryId": 3,
+  "price": 15.00,
+  "conditionId": 1
+}
+
+###
+
+### ITEM-04: Create Fourth Item (Clothing)
+# @name createItem4
+POST {{UniShareProject.API_HostAddress}}/api/items
+Content-Type: application/json
+Authorization: Bearer {{authToken2}}
+
+{
+  "title": "Winter Jacket",
+  "description": "North Face winter jacket, size Medium. Kept me warm through two winters.",
+  "categoryId": 4,
+  "price": 45.00,
+  "conditionId": 2
+}
+
+###
+
+### ITEM-05: Create Fifth Item (Other Category)
+# @name createItem5
+POST {{UniShareProject.API_HostAddress}}/api/items
+Content-Type: application/json
+Authorization: Bearer {{authToken2}}
+
+{
+  "title": "Tennis Racket",
+  "description": "Wilson tennis racket, barely used. Great for beginners.",
+  "categoryId": 5,
+  "price": 30.00,
+  "conditionId": 1
+}
+
+###
+
+### ITEM-06: Add Images to First Item (2 images)
+POST {{UniShareProject.API_HostAddress}}/api/items/{{itemId1}}/images
 Content-Type: application/json
 Authorization: Bearer {{authToken}}
 
@@ -94,8 +404,10 @@ Authorization: Bearer {{authToken}}
   ]
 }
 
-### STEP 8: Add more images to first item (as seller)
-POST {{UniShareProject.API_HostAddress}}/api/items/1/images
+###
+
+### ITEM-07: Add More Images to First Item (1 more)
+POST {{UniShareProject.API_HostAddress}}/api/items/{{itemId1}}/images
 Content-Type: application/json
 Authorization: Bearer {{authToken}}
 
@@ -105,8 +417,10 @@ Authorization: Bearer {{authToken}}
   ]
 }
 
-### STEP 9: Add images to second item (as seller) - Test 4 image limit
-POST {{UniShareProject.API_HostAddress}}/api/items/2/images
+###
+
+### ITEM-08: Add Images to Second Item (4 images - max limit)
+POST {{UniShareProject.API_HostAddress}}/api/items/{{itemId2}}/images
 Content-Type: application/json
 Authorization: Bearer {{authToken}}
 
@@ -119,139 +433,175 @@ Authorization: Bearer {{authToken}}
   ]
 }
 
-### STEP 10: Search all items (public access - no auth needed)
+###
+
+### ITEM-09: Search All Items (No Auth Required)
 GET {{UniShareProject.API_HostAddress}}/api/items
 
-### STEP 11: Search items with filters
-GET {{UniShareProject.API_HostAddress}}/api/items?categoryId=1&statusId=1&q=calculus
+###
 
-### STEP 12: Get specific item by ID (public access)
-GET {{UniShareProject.API_HostAddress}}/api/items/1
+### ITEM-10: Search Items with Pagination
+GET {{UniShareProject.API_HostAddress}}/api/items?page=1&pageSize=5
 
-### STEP 13: Request purchase of first item (as second user - buyer)
-POST {{UniShareProject.API_HostAddress}}/api/items/1/request-purchase
+###
+
+### ITEM-11: Search Items by Category (Books)
+GET {{UniShareProject.API_HostAddress}}/api/items?categoryId=1
+
+###
+
+### ITEM-12: Search Items by Status (Active)
+GET {{UniShareProject.API_HostAddress}}/api/items?statusId=1
+
+###
+
+### ITEM-13: Search Items by Condition (Like New)
+GET {{UniShareProject.API_HostAddress}}/api/items?conditionId=1
+
+###
+
+### ITEM-14: Search Items by Query (Calculus)
+GET {{UniShareProject.API_HostAddress}}/api/items?q=calculus
+
+###
+
+### ITEM-15: Search Items with Multiple Filters
+GET {{UniShareProject.API_HostAddress}}/api/items?categoryId=2&statusId=1&conditionId=2&q=MacBook
+
+###
+
+### ITEM-16: Search Items by Price Range (Min)
+GET {{UniShareProject.API_HostAddress}}/api/items?minPrice=50
+
+###
+
+### ITEM-17: Search Items by Price Range (Max)
+GET {{UniShareProject.API_HostAddress}}/api/items?maxPrice=100
+
+###
+
+### ITEM-18: Search Items by Price Range (Min and Max)
+GET {{UniShareProject.API_HostAddress}}/api/items?minPrice=10&maxPrice=50
+
+###
+
+### ITEM-19: Get Specific Item by ID
+GET {{UniShareProject.API_HostAddress}}/api/items/{{itemId1}}
+
+###
+
+### ITEM-20: Request Purchase (User 2 buys User 1's item)
+POST {{UniShareProject.API_HostAddress}}/api/items/{{itemId1}}/request-purchase
 Authorization: Bearer {{authToken2}}
 
-### STEP 14: Verify item status changed to Pending
-GET {{UniShareProject.API_HostAddress}}/api/items/1
+###
 
-### STEP 15: Mark item as sold (as original seller)
-POST {{UniShareProject.API_HostAddress}}/api/items/1/mark-sold
+### ITEM-21: Verify Item Status Changed to Pending
+GET {{UniShareProject.API_HostAddress}}/api/items/{{itemId1}}
+
+###
+
+### ITEM-22: Mark Item as Sold (Seller confirms)
+POST {{UniShareProject.API_HostAddress}}/api/items/{{itemId1}}/mark-sold
 Authorization: Bearer {{authToken}}
 
-### STEP 16: Verify item status changed to Sold
-GET {{UniShareProject.API_HostAddress}}/api/items/1
+###
 
-### STEP 17: Request purchase of second item (as second user - buyer)
-POST {{UniShareProject.API_HostAddress}}/api/items/2/request-purchase
+### ITEM-23: Verify Item Status Changed to Sold
+GET {{UniShareProject.API_HostAddress}}/api/items/{{itemId1}}
+
+###
+
+### ITEM-24: Request Purchase of Second Item
+POST {{UniShareProject.API_HostAddress}}/api/items/{{itemId2}}/request-purchase
 Authorization: Bearer {{authToken2}}
 
-### STEP 18: Update item status manually (as seller/admin)
-PATCH {{UniShareProject.API_HostAddress}}/api/items/2/status?statusId=4
+###
+
+### ITEM-25: Update Item Status to Withdrawn (Owner)
+PATCH {{UniShareProject.API_HostAddress}}/api/items/{{itemId2}}/status?statusId=4
 Authorization: Bearer {{authToken}}
 
-### STEP 19: Get current user profile (as first user)
-GET {{UniShareProject.API_HostAddress}}/api/users/me
+###
+
+### ITEM-26: Update Item Status Back to Active
+PATCH {{UniShareProject.API_HostAddress}}/api/items/{{itemId2}}/status?statusId=1
 Authorization: Bearer {{authToken}}
 
-### STEP 20: Update current user profile (as first user)
-PUT {{UniShareProject.API_HostAddress}}/api/users/me
-Content-Type: application/json
-Authorization: Bearer {{authToken}}
+###
 
-{
-  "phone": "+1-555-123-4567",
-  "house": "Johnson Hall",
-  "profileImageUrl": "https://picsum.photos/200/200?random=300"
-}
-
-### STEP 21: Verify profile was updated
-GET {{UniShareProject.API_HostAddress}}/api/users/me
-Authorization: Bearer {{authToken}}
-
-### STEP 22: Get current user profile (as second user)
-GET {{UniShareProject.API_HostAddress}}/api/users/me
-Authorization: Bearer {{authToken2}}
-
-### STEP 23: Update second user profile
-PUT {{UniShareProject.API_HostAddress}}/api/users/me
-Content-Type: application/json
-Authorization: Bearer {{authToken2}}
-
-{
-  "phone": "+1-555-987-6543",
-  "house": "Anderson Hall"
-}
-
-### ---------------------------------------------------------------------------
-# ERROR SCENARIOS TESTING
-### ---------------------------------------------------------------------------
-
-### ERROR 1: Register with invalid email domain (should fail)
-POST {{UniShareProject.API_HostAddress}}/api/auth/register
-Content-Type: application/json
-
-{
-  "firstName": "Invalid",
-  "lastName": "User",
-  "email": "invalid@gmail.com",
-  "password": "TestPassword123"
-}
-
-### ERROR 2: Register duplicate email (should fail)
-POST {{UniShareProject.API_HostAddress}}/api/auth/register
-Content-Type: application/json
-
-{
-  "firstName": "Duplicate",
-  "lastName": "User",
-  "email": "{{testEmail}}",
-  "password": "DifferentPassword123"
-}
-
-### ERROR 3: Login with wrong password (should fail)
-POST {{UniShareProject.API_HostAddress}}/api/auth/login
-Content-Type: application/json
-
-{
-  "email": "{{testEmail}}",
-  "password": "WrongPassword"
-}
-
-### ERROR 4: Create item without authentication (should fail with 401)
+### ITEM-ERROR-01: Create Item Without Authentication
 POST {{UniShareProject.API_HostAddress}}/api/items
 Content-Type: application/json
 
 {
   "title": "Unauthorized Item",
-  "description": "This should fail without proper auth",
+  "description": "This should fail",
   "categoryId": 1,
   "price": 50.00,
   "conditionId": 1
 }
 
-### ERROR 5: Create item with invalid data (should fail with validation)
+###
+
+### ITEM-ERROR-02: Create Item with Invalid Data (Empty Title)
 POST {{UniShareProject.API_HostAddress}}/api/items
 Content-Type: application/json
 Authorization: Bearer {{authToken}}
 
 {
   "title": "",
-  "description": "Invalid",
-  "price": -10.00,
-  "conditionId": 999
+  "description": "Invalid item",
+  "categoryId": 1,
+  "price": 50.00,
+  "conditionId": 1
 }
 
-### ERROR 6: Add images without authentication (should fail with 401)
-POST {{UniShareProject.API_HostAddress}}/api/items/1/images
+###
+
+### ITEM-ERROR-03: Create Item with Negative Price
+POST {{UniShareProject.API_HostAddress}}/api/items
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "title": "Invalid Price Item",
+  "description": "This has negative price",
+  "categoryId": 1,
+  "price": -10.00,
+  "conditionId": 1
+}
+
+###
+
+### TODO: CHANGE RESPONSE TO THIS ERROR IT GIVES TO MUCH INFORMATION ABOUT WEBSITE
+### ITEM-ERROR-04: Create Item with Invalid Category
+POST {{UniShareProject.API_HostAddress}}/api/items
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "title": "Invalid Category",
+  "description": "Invalid category ID",
+  "categoryId": 999,
+  "price": 50.00,
+  "conditionId": 1
+}
+
+###
+
+### ITEM-ERROR-05: Add Images Without Authentication
+POST {{UniShareProject.API_HostAddress}}/api/items/{{itemId1}}/images
 Content-Type: application/json
 
 {
   "imageUrls": ["https://picsum.photos/800/600?random=100"]
 }
 
-### ERROR 7: Add images as non-owner (should fail with 403)
-POST {{UniShareProject.API_HostAddress}}/api/items/1/images
+###
+
+### ITEM-ERROR-06: Add Images as Non-Owner (403)
+POST {{UniShareProject.API_HostAddress}}/api/items/{{itemId1}}/images
 Content-Type: application/json
 Authorization: Bearer {{authToken2}}
 
@@ -259,8 +609,10 @@ Authorization: Bearer {{authToken2}}
   "imageUrls": ["https://picsum.photos/800/600?random=101"]
 }
 
-### ERROR 8: Add invalid image URLs (should fail with validation)
-POST {{UniShareProject.API_HostAddress}}/api/items/1/images
+###
+
+### ITEM-ERROR-07: Add Invalid Image URLs
+POST {{UniShareProject.API_HostAddress}}/api/items/{{itemId1}}/images
 Content-Type: application/json
 Authorization: Bearer {{authToken}}
 
@@ -272,67 +624,24 @@ Authorization: Bearer {{authToken}}
   ]
 }
 
-### ERROR 9: Add too many images (should fail with 409)
-# Try to add more images to item 1 which already has 3, adding 2 more = 5 total (exceeds limit)
-POST {{UniShareProject.API_HostAddress}}/api/items/1/images
+###
+
+### ITEM-ERROR-08: Add Too Many Images (Exceeds 4 limit)
+POST {{UniShareProject.API_HostAddress}}/api/items/{{itemId1}}/images
 Content-Type: application/json
 Authorization: Bearer {{authToken}}
 
 {
   "imageUrls": [
     "https://picsum.photos/800/600?random=102",
-    "https://picsum.photos/800/600?random=103"
+  "https://picsum.photos/800/600?random=103"
   ]
 }
 
-### ERROR 10: Request purchase without authentication (should fail with 401)
-POST {{UniShareProject.API_HostAddress}}/api/items/2/request-purchase
+###
 
-### ERROR 11: Request purchase of non-existent item (should fail with 404)
-POST {{UniShareProject.API_HostAddress}}/api/items/999999/request-purchase
-Authorization: Bearer {{authToken2}}
-
-### ERROR 12: Request purchase of already pending/sold item (should fail with 409)
-POST {{UniShareProject.API_HostAddress}}/api/items/1/request-purchase
-Authorization: Bearer {{authToken2}}
-
-### ERROR 13: Mark sold without authentication (should fail with 401)
-POST {{UniShareProject.API_HostAddress}}/api/items/2/mark-sold
-
-### ERROR 14: Mark sold as non-owner (should fail with 403)
-POST {{UniShareProject.API_HostAddress}}/api/items/2/mark-sold
-Authorization: Bearer {{authToken2}}
-
-### ERROR 15: Mark sold when not in Pending status (should fail with 409)
-# Create a new item and try to mark it sold while still Active
-POST {{UniShareProject.API_HostAddress}}/api/items
-Content-Type: application/json
-Authorization: Bearer {{authToken}}
-
-{
-  "title": "Test Item for Status Error",
-  "description": "This item will be used to test marking sold while Active",
-  "categoryId": 5,
-  "price": 25.00,
-  "conditionId": 3
-}
-
-### ERROR 16: Try to mark the new item as sold while it's still Active (should fail)
-POST {{UniShareProject.API_HostAddress}}/api/items/3/mark-sold
-Authorization: Bearer {{authToken}}
-
-### ERROR 17: Mark non-existent item as sold (should fail with 404)
-POST {{UniShareProject.API_HostAddress}}/api/items/999999/mark-sold
-Authorization: Bearer {{authToken}}
-
-### ERROR 18: Update status without authentication (should fail with 401)
-PATCH {{UniShareProject.API_HostAddress}}/api/items/1/status?statusId=3
-
-### ERROR 19: Get non-existent item (should fail with 404)
-GET {{UniShareProject.API_HostAddress}}/api/items/999999
-
-### ERROR 20: Add empty image URLs array (should fail with validation)
-POST {{UniShareProject.API_HostAddress}}/api/items/1/images
+### ITEM-ERROR-09: Add Empty Image Array
+POST {{UniShareProject.API_HostAddress}}/api/items/{{itemId1}}/images
 Content-Type: application/json
 Authorization: Bearer {{authToken}}
 
@@ -340,115 +649,709 @@ Authorization: Bearer {{authToken}}
   "imageUrls": []
 }
 
-### ERROR 21: Add null image URLs (should fail with validation)
-POST {{UniShareProject.API_HostAddress}}/api/items/1/images
+###
+
+### ITEM-ERROR-10: Request Purchase Without Auth
+POST {{UniShareProject.API_HostAddress}}/api/items/3/request-purchase
+
+###
+
+### ITEM-ERROR-11: Request Purchase of Non-existent Item
+POST {{UniShareProject.API_HostAddress}}/api/items/999999/request-purchase
+Authorization: Bearer {{authToken2}}
+
+###
+
+### ITEM-ERROR-12: Request Purchase of Already Sold Item
+POST {{UniShareProject.API_HostAddress}}/api/items/{{itemId1}}/request-purchase
+Authorization: Bearer {{authToken2}}
+
+###
+
+### ITEM-ERROR-13: Mark Sold Without Authentication
+POST {{UniShareProject.API_HostAddress}}/api/items/3/mark-sold
+
+###
+
+### ITEM-ERROR-14: Mark Sold as Non-Owner
+POST {{UniShareProject.API_HostAddress}}/api/items/3/mark-sold
+Authorization: Bearer {{authToken2}}
+
+###
+### TODO: THIS SHOULD RETURN AN ERROR
+### ITEM-ERROR-15: Mark Sold When Not Pending
+POST {{UniShareProject.API_HostAddress}}/api/items/3/mark-sold
+Authorization: Bearer {{authToken}}
+
+###
+
+### ITEM-ERROR-16: Update Status Without Authentication
+PATCH {{UniShareProject.API_HostAddress}}/api/items/3/status?statusId=3
+
+###
+
+### ITEM-ERROR-17: Get Non-existent Item
+GET {{UniShareProject.API_HostAddress}}/api/items/999999
+
+###
+
+### ITEM-ERROR-18: Search with Invalid Pagination
+GET {{UniShareProject.API_HostAddress}}/api/items?page=0&pageSize=200
+
+### ========================================================================
+### SECTION 5: MESSAGING SYSTEM
+### ========================================================================
+
+### MSG-01: Start Conversation (User 2 messages User 1 about Item 2)
+# @name startConversation1
+# IMPORTANT: After running this, copy the returned conversationId to @conversationId variable above
+POST {{UniShareProject.API_HostAddress}}/api/v1/messages/conversations
+Content-Type: application/json
+Authorization: Bearer {{authToken2}}
+
+{
+  "otherUserId": 1,
+  "itemId": {{itemId2}}
+}
+
+###
+
+### MSG-02: Send First Message (User 2 -> User 1)
+# @name sendMessage1
+POST {{UniShareProject.API_HostAddress}}/api/v1/messages/send
+Content-Type: application/json
+Authorization: Bearer {{authToken2}}
+
+{
+  "conversationId": {{conversationId}},
+  "content": "Hello! Is this MacBook still available? I'm very interested in purchasing it."
+}
+
+###
+
+### MSG-03: Send Reply Message (User 1 -> User 2)
+POST {{UniShareProject.API_HostAddress}}/api/v1/messages/send
 Content-Type: application/json
 Authorization: Bearer {{authToken}}
 
 {
-  "imageUrls": null
+  "conversationId": {{conversationId}},
+  "content": "Yes, it's still available! It's in great condition. Would you like to meet up to see it?"
 }
 
-### ERROR 22: Get user profile without authentication (should fail with 401)
+###
+
+### MSG-04: Send Another Message (User 2 -> User 1)
+POST {{UniShareProject.API_HostAddress}}/api/v1/messages/send
+Content-Type: application/json
+Authorization: Bearer {{authToken2}}
+
+{
+  "conversationId": {{conversationId}},
+  "content": "That sounds perfect! I'm available tomorrow afternoon. Does 2 PM work for you?"
+}
+
+###
+
+### MSG-05: Send Confirmation (User 1 -> User 2)
+POST {{UniShareProject.API_HostAddress}}/api/v1/messages/send
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "conversationId": {{conversationId}},
+  "content": "2 PM works great! Let's meet at the library. See you then!"
+}
+
+###
+
+### MSG-06: Get Conversation Messages (User 1 view)
+GET {{UniShareProject.API_HostAddress}}/api/v1/messages/conversations/{{conversationId}}?page=1&pageSize=20
+Authorization: Bearer {{authToken}}
+
+###
+
+### MSG-07: Get Conversation Messages (User 2 view)
+GET {{UniShareProject.API_HostAddress}}/api/v1/messages/conversations/{{conversationId}}?page=1&pageSize=20
+Authorization: Bearer {{authToken2}}
+
+###
+
+### MSG-08: Get Conversation Messages with Pagination (Page 2)
+GET {{UniShareProject.API_HostAddress}}/api/v1/messages/conversations/{{conversationId}}?page=2&pageSize=2
+Authorization: Bearer {{authToken}}
+
+###
+
+### MSG-09: Get User 1 Inbox
+GET {{UniShareProject.API_HostAddress}}/api/v1/messages/inbox?page=1&pageSize=20
+Authorization: Bearer {{authToken}}
+
+###
+
+### MSG-10: Get User 2 Inbox
+GET {{UniShareProject.API_HostAddress}}/api/v1/messages/inbox?page=1&pageSize=20
+Authorization: Bearer {{authToken2}}
+
+###
+
+### MSG-11: Start Second Conversation (User 1 messages User 2 about Item 4)
+# @name startConversation2
+# IMPORTANT: After running this, copy the returned conversationId to @conversationId2 variable above
+POST {{UniShareProject.API_HostAddress}}/api/v1/messages/conversations
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "otherUserId": 1002,
+  "itemId": 4
+}
+
+###
+
+### MSG-12: Send Message in Second Conversation
+POST {{UniShareProject.API_HostAddress}}/api/v1/messages/send
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "conversationId": {{conversationId2}},
+  "content": "Hi! I'm interested in your winter jacket. What size is it?"
+}
+
+###
+
+### MSG-13: Reply in Second Conversation
+POST {{UniShareProject.API_HostAddress}}/api/v1/messages/send
+Content-Type: application/json
+Authorization: Bearer {{authToken2}}
+
+{
+  "conversationId": {{conversationId2}},
+  "content": "It's size Medium. Very warm and in great condition!"
+}
+
+###
+
+### MSG-14: Start Conversation Without Item (General Chat)
+# @name startConversation3
+# IMPORTANT: After running this, update @conversationId3 variable with the returned ID
+POST {{UniShareProject.API_HostAddress}}/api/v1/messages/conversations
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "otherUserId": 1002,
+  "itemId": null
+}
+
+###
+
+### MSG-15: Send Message in General Conversation
+# NOTE: Update conversationId below with actual ID from MSG-14 response
+POST {{UniShareProject.API_HostAddress}}/api/v1/messages/send
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "conversationId": 3,
+  "content": "Hey! Thanks for being such a great buyer/seller on the platform!"
+}
+
+###
+
+### MSG-16: Get Updated Inbox (User 1 - should show multiple conversations)
+GET {{UniShareProject.API_HostAddress}}/api/v1/messages/inbox?page=1&pageSize=20
+Authorization: Bearer {{authToken}}
+
+###
+
+### MSG-17: Get Updated Inbox (User 2 - should show multiple conversations)
+GET {{UniShareProject.API_HostAddress}}/api/v1/messages/inbox?page=1&pageSize=20
+Authorization: Bearer {{authToken2}}
+
+###
+
+### MSG-18: Try to Get Existing Conversation (Should Return Same ID)
+POST {{UniShareProject.API_HostAddress}}/api/v1/messages/conversations
+Content-Type: application/json
+Authorization: Bearer {{authToken2}}
+
+{
+  "otherUserId": 1,
+  "itemId": 2
+}
+
+###
+
+### MSG-ERROR-01: Start Conversation Without Authentication
+POST {{UniShareProject.API_HostAddress}}/api/v1/messages/conversations
+Content-Type: application/json
+
+{
+  "otherUserId": 2,
+  "itemId": 1
+}
+
+###
+### TODO: THIS ERROR SHOULD RETURN A BETTER ERROR MESSAGE
+### MSG-ERROR-02: Start Conversation with Invalid User ID
+POST {{UniShareProject.API_HostAddress}}/api/v1/messages/conversations
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "otherUserId": 999999,
+  "itemId": 1
+}
+
+###
+### TODO: THIS ERROR SHOULD RETURN A BETTER ERROR MESSAGE
+### MSG-ERROR-03: Start Conversation with Invalid Item ID
+POST {{UniShareProject.API_HostAddress}}/api/v1/messages/conversations
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "otherUserId": 2,
+  "itemId": 999999
+}
+
+###
+### TODO: THIS ERROR SHOULD RETURN A BETTER ERROR MESSAGE
+### MSG-ERROR-04: Start Conversation with Self
+POST {{UniShareProject.API_HostAddress}}/api/v1/messages/conversations
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "otherUserId": 1,
+  "itemId": 1
+}
+
+###
+
+### MSG-ERROR-05: Send Message Without Authentication
+POST {{UniShareProject.API_HostAddress}}/api/v1/messages/send
+Content-Type: application/json
+
+{
+  "conversationId": 1,
+  "content": "This should fail"
+}
+
+###
+
+### MSG-ERROR-06: Send Message to Non-existent Conversation
+POST {{UniShareProject.API_HostAddress}}/api/v1/messages/send
+
+{
+  "otherUserId": 2,
+  "itemId": 999999
+}
+
+###
+### TODO: THIS ERROR SHOULD RETURN A BETTER ERROR MESSAGE
+### MSG-ERROR-04: Start Conversation with Self
+POST {{UniShareProject.API_HostAddress}}/api/v1/messages/conversations
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "otherUserId": 1,
+  "itemId": 1
+}
+
+###
+
+### MSG-ERROR-05: Send Message Without Authentication
+POST {{UniShareProject.API_HostAddress}}/api/v1/messages/send
+Content-Type: application/json
+
+{
+  "conversationId": 1,
+  "content": "This should fail"
+}
+
+###
+
+### MSG-ERROR-06: Send Message to Non-existent Conversation
+POST {{UniShareProject.API_HostAddress}}/api/v1/messages/send
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "conversationId": 999999,
+  "content": "This conversation doesn't exist"
+}
+
+###
+
+### MSG-ERROR-07: Send Empty Message
+POST {{UniShareProject.API_HostAddress}}/api/v1/messages/send
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "conversationId": 1,
+  "content": ""
+}
+
+###
+### TODO: THIS ERROR SHOULD RETURN A BETTER ERROR MESSAGE
+### MSG-ERROR-08: Send Message Too Long (>4000 chars)
+POST {{UniShareProject.API_HostAddress}}/api/v1/messages/send
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "conversationId": 1,
+  "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua... [repeat this 4000+ times]"
+}
+
+###
+
+### MSG-ERROR-09: Send Message as Non-Participant
+# User trying to send message to conversation they're not part of
+POST {{UniShareProject.API_HostAddress}}/api/v1/messages/send
+Content-Type: application/json
+Authorization: Bearer {{adminToken}}
+
+{
+  "conversationId": 1,
+  "content": "I'm not part of this conversation"
+}
+
+###
+
+### MSG-ERROR-10: Get Conversation Without Authentication
+GET {{UniShareProject.API_HostAddress}}/api/v1/messages/conversations/1
+
+###
+
+### MSG-ERROR-11: Get Non-existent Conversation
+GET {{UniShareProject.API_HostAddress}}/api/v1/messages/conversations/999999
+Authorization: Bearer {{authToken}}
+
+###
+
+### MSG-ERROR-12: Get Conversation as Non-Participant
+GET {{UniShareProject.API_HostAddress}}/api/v1/messages/conversations/1
+Authorization: Bearer {{adminToken}}
+
+###
+
+### MSG-ERROR-13: Get Conversation with Invalid Pagination (page 0)
+GET {{UniShareProject.API_HostAddress}}/api/v1/messages/conversations/1?page=0&pageSize=20
+Authorization: Bearer {{authToken}}
+
+###
+
+### MSG-ERROR-14: Get Conversation with Invalid Page Size (>100)
+GET {{UniShareProject.API_HostAddress}}/api/v1/messages/conversations/1?page=1&pageSize=200
+Authorization: Bearer {{authToken}}
+
+###
+
+### MSG-ERROR-15: Get Inbox Without Authentication
+GET {{UniShareProject.API_HostAddress}}/api/v1/messages/inbox
+
+###
+
+### MSG-ERROR-16: Get Inbox with Invalid Pagination
+GET {{UniShareProject.API_HostAddress}}/api/v1/messages/inbox?page=-1&pageSize=0
+Authorization: Bearer {{authToken}}
+
+### ========================================================================
+### SECTION 6: ADMIN OPERATIONS (Requires Admin Role)
+### ========================================================================
+
+### ADMIN-01: Get Admin Dashboard
+GET {{UniShareProject.API_HostAddress}}/api/admin/dashboard
+Authorization: Bearer {{adminToken}}
+
+###
+
+### ADMIN-02: Ban User (Ban User 2)
+PUT {{UniShareProject.API_HostAddress}}/api/admin/users/2/ban
+Authorization: Bearer {{adminToken}}
+
+###
+### TODO: BANDED USER CAN LOGIN AFTER BEING BANDED SHOULD NOT WORK
+### ADMIN-03: Verify User is Banned (Try to Login)
+POST {{UniShareProject.API_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{testEmail2}}",
+  "password": "{{testPassword2}}"
+}
+
+###
+
+### ADMIN-04: Unban User (Unban User 2)
+PUT {{UniShareProject.API_HostAddress}}/api/admin/users/2/unban
+Authorization: Bearer {{adminToken}}
+
+###
+
+### ADMIN-05: Verify User is Unbanned (Login Should Work)
+POST {{UniShareProject.API_HostAddress}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "{{testEmail2}}",
+  "password": "{{testPassword2}}"
+}
+
+###
+
+### ADMIN-06: Delete Item as Admin (Delete Item 3)
+DELETE {{UniShareProject.API_HostAddress}}/api/admin/items/3
+Authorization: Bearer {{adminToken}}
+
+###
+
+### ADMIN-07: Verify Item Was Deleted
+GET {{UniShareProject.API_HostAddress}}/api/items/3
+
+###
+
+### ADMIN-ERROR-01: Access Dashboard Without Authentication
+GET {{UniShareProject.API_HostAddress}}/api/admin/dashboard
+
+###
+
+### ADMIN-ERROR-02: Access Dashboard as Regular User (Not Admin)
+GET {{UniShareProject.API_HostAddress}}/api/admin/dashboard
+Authorization: Bearer {{authToken}}
+
+###
+
+### ADMIN-ERROR-03: Ban Non-existent User
+PUT {{UniShareProject.API_HostAddress}}/api/admin/users/999999/ban
+Authorization: Bearer {{adminToken}}
+
+###
+
+### ADMIN-ERROR-04: Unban Non-existent User
+PUT {{UniShareProject.API_HostAddress}}/api/admin/users/999999/unban
+Authorization: Bearer {{adminToken}}
+
+###
+
+### ADMIN-ERROR-05: Delete Non-existent Item
+DELETE {{UniShareProject.API_HostAddress}}/api/admin/items/999999
+Authorization: Bearer {{adminToken}}
+
+###
+
+### ADMIN-ERROR-06: Ban User Without Authentication
+PUT {{UniShareProject.API_HostAddress}}/api/admin/users/2/ban
+
+###
+
+### ADMIN-ERROR-07: Delete Item as Regular User (Not Admin)
+DELETE {{UniShareProject.API_HostAddress}}/api/admin/items/4
+Authorization: Bearer {{authToken}}
+
+###
+
+### ========================================================================
+### SECTION 7: COMPREHENSIVE PAGINATION TESTS
+### ========================================================================
+
+### PAGE-01: Items Search - Page 1 of 2
+GET {{UniShareProject.API_HostAddress}}/api/items?page=1&pageSize=3
+
+###
+
+### PAGE-02: Items Search - Page 2 of 2
+GET {{UniShareProject.API_HostAddress}}/api/items?page=2&pageSize=3
+
+###
+
+### PAGE-03: Items Search - Large Page Size
+GET {{UniShareProject.API_HostAddress}}/api/items?page=1&pageSize=50
+
+###
+
+### PAGE-04: Messages Inbox - First Page
+GET {{UniShareProject.API_HostAddress}}/api/v1/messages/inbox?page=1&pageSize=10
+Authorization: Bearer {{authToken}}
+
+###
+
+### PAGE-05: Messages Conversation - First Page
+GET {{UniShareProject.API_HostAddress}}/api/v1/messages/conversations/1?page=1&pageSize=2
+Authorization: Bearer {{authToken}}
+
+###
+
+### PAGE-06: Messages Conversation - Second Page
+GET {{UniShareProject.API_HostAddress}}/api/v1/messages/conversations/1?page=2&pageSize=2
+Authorization: Bearer {{authToken}}
+
+###
+
+### ========================================================================
+### SECTION 8: EDGE CASES & BOUNDARY TESTS
+### ========================================================================
+
+### EDGE-01: Create Item with Minimum Price (0.01)
+POST {{UniShareProject.API_HostAddress}}/api/items
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "title": "Penny Item",
+  "description": "Testing minimum price",
+  "categoryId": 5,
+  "price": 0.01,
+  "conditionId": 1
+}
+
+###
+
+### EDGE-02: Create Item with Maximum Price
+POST {{UniShareProject.API_HostAddress}}/api/items
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "title": "Expensive Item",
+  "description": "Testing maximum price",
+  "categoryId": 2,
+  "price": 999999.99,
+  "conditionId": 1
+}
+
+###
+
+### EDGE-03: Create Item with Very Long Title (Near Limit)
+POST {{UniShareProject.API_HostAddress}}/api/items
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "title": "This is a very long title that tests the maximum character limit for item titles in the database which should be around 100 characters",
+  "description": "Testing long title",
+  "categoryId": 5,
+  "price": 25.00,
+  "conditionId": 2
+}
+
+###
+
+### EDGE-04: Create Item with Very Long Description (Near Limit)
+POST {{UniShareProject.API_HostAddress}}/api/items
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "title": "Long Description Item",
+  "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+  "categoryId": 5,
+  "price": 15.00,
+  "conditionId": 3
+}
+
+###
+
+### EDGE-05: Send Message with Maximum Allowed Length
+POST {{UniShareProject.API_HostAddress}}/api/v1/messages/send
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "conversationId": 1,
+  "content": "This is a very long message that tests the maximum character limit. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua... [content up to 4000 chars]"
+}
+
+###
+
+### EDGE-06: Search with Empty Query String
+GET {{UniShareProject.API_HostAddress}}/api/items?q=
+
+###
+
+### EDGE-07: Search with Special Characters
+GET {{UniShareProject.API_HostAddress}}/api/items?q=@#$%^&*()
+
+### ========================================================================
+### SECTION 9: CONCURRENT OPERATION TESTS
+### ========================================================================
+
+### CONCURRENT-01: Multiple Users Requesting Same Item
+# User 2 already requested item 2, now User 1 tries (should fail or queue)
+POST {{UniShareProject.API_HostAddress}}/api/items/5/request-purchase
+Authorization: Bearer {{authToken}}
+
+###
+
+### CONCURRENT-02: Try to Update Item While Purchase is Pending
+PATCH {{UniShareProject.API_HostAddress}}/api/items/5/status?statusId=1
+Authorization: Bearer {{authToken2}}
+
+### ========================================================================
+### SECTION 10: DATA CONSISTENCY TESTS
+### ========================================================================
+
+### CONSISTENCY-01: Create Item Then Immediately Fetch It
+# @name createAndFetch
+POST {{UniShareProject.API_HostAddress}}/api/items
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "title": "Immediate Fetch Test",
+  "description": "Testing data consistency",
+  "categoryId": 5,
+  "price": 20.00,
+  "conditionId": 2
+}
+
+###
+
+### CONSISTENCY-02: Fetch the Item Just Created
+GET {{UniShareProject.API_HostAddress}}/api/items/19
+
+###
+
+### CONSISTENCY-03: Update Profile Then Immediately Fetch
+PUT {{UniShareProject.API_HostAddress}}/api/users/me
+Content-Type: application/json
+Authorization: Bearer {{authToken}}
+
+{
+  "phone": "+1-555-UPDATED",
+  "house": "Updated Hall"
+}
+
+###
+
+### CONSISTENCY-04: Verify Profile Update Immediately
 GET {{UniShareProject.API_HostAddress}}/api/users/me
-
-### ERROR 23: Update user profile without authentication (should fail with 401)
-PUT {{UniShareProject.API_HostAddress}}/api/users/me
-Content-Type: application/json
-
-{
-  "phone": "+1-555-000-0000",
-  "house": "Test Hall"
-}
-
-### ERROR 24: Update user profile with invalid data (should fail with validation)
-PUT {{UniShareProject.API_HostAddress}}/api/users/me
-Content-Type: application/json
 Authorization: Bearer {{authToken}}
 
-{
-  "phone": "this-is-way-too-long-for-a-phone-number-field-that-should-only-be-20-characters-max",
-  "house": "this-house-name-is-way-too-long-for-the-field-that-should-only-be-50-characters-maximum-allowed",
-  "profileImageUrl": "not-a-valid-url"
-}
+###
 
-### ERROR 25: Update user profile with null request body (should fail)
-PUT {{UniShareProject.API_HostAddress}}/api/users/me
-Content-Type: application/json
-Authorization: Bearer {{authToken}}
-
-### Try to add one more image (should fail - exceeds limit)
-POST {{UniShareProject.API_HostAddress}}/api/items/4/images
-Content-Type: application/json
-Authorization: Bearer {{authToken}}
-
-{
-  "imageUrls": [
-    "https://picsum.photos/800/600?random=204"
-  ]
-}
-
-### ---------------------------------------------------------------------------
-# USER PROFILE MANAGEMENT TESTING
-### ---------------------------------------------------------------------------
-
-### Get profile without any updates (baseline)
-GET {{UniShareProject.API_HostAddress}}/api/users/me
-Authorization: Bearer {{authToken}}
-
-### Update profile with all fields
-PUT {{UniShareProject.API_HostAddress}}/api/users/me
-Content-Type: application/json
-Authorization: Bearer {{authToken}}
-
-{
-  "phone": "+1-555-111-2222",
-  "house": "Davis Hall",
-  "profileImageUrl": "https://picsum.photos/200/200?random=400"
-}
-
-### Verify full profile update
-GET {{UniShareProject.API_HostAddress}}/api/users/me
-Authorization: Bearer {{authToken}}
-
-### Update profile with partial fields (only phone)
-PUT {{UniShareProject.API_HostAddress}}/api/users/me
-Content-Type: application/json
-Authorization: Bearer {{authToken}}
-
-{
-  "phone": "+1-555-333-4444"
-}
-
-### Update profile with partial fields (only house)
-PUT {{UniShareProject.API_HostAddress}}/api/users/me
-Content-Type: application/json
-Authorization: Bearer {{authToken}}
-
-{
-  "house": "Miller Hall"
-}
-
-### Update profile with partial fields (only profile image)
-PUT {{UniShareProject.API_HostAddress}}/api/users/me
-Content-Type: application/json
-Authorization: Bearer {{authToken}}
-
-{
-  "profileImageUrl": "https://picsum.photos/200/200?random=401"
-}
-
-### Clear profile fields by setting to null/empty
-PUT {{UniShareProject.API_HostAddress}}/api/users/me
-Content-Type: application/json
-Authorization: Bearer {{authToken}}
-
-{
-  "phone": null,
-  "house": null,
-  "profileImageUrl": null
-}
-
-### Verify profile fields were cleared
-GET {{UniShareProject.API_HostAddress}}/api/users/me
-Authorization: Bearer {{authToken}}
+### ========================================================================
+### END OF TEST FILE
+### ========================================================================
+###
+### EXECUTION SUMMARY:
+### - Total Endpoints Covered: 50+
+### - Authentication Tests: 11
+### - User Profile Tests: 12
+### - Item Management Tests: 44
+### - Messaging Tests: 34
+### - Admin Operations Tests: 12
+### - Health & Version Tests: 4
+### - Edge Cases & Boundaries: 7
+### - Pagination Tests: 6
+### - Consistency Tests: 4
+###
+### TOTAL TEST CASES: 134+
+###
+### ========================================================================

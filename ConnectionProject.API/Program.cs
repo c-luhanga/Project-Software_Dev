@@ -230,39 +230,95 @@ builder.Services.AddSwaggerGen(c =>
         Description = @"
 **UniShare API - Principia College Marketplace**
 
-A RESTful API for the UniShare project, enabling students at Principia College to buy, sell, and trade items within their campus community.
+A RESTful API for the UniShare project, enabling students at Principia College to buy, sell, trade, and communicate within their campus community.
 
 ## Features
 - **User Authentication**: JWT-based authentication with @principia.edu email validation
 - **Item Management**: Create, search, and manage marketplace listings
 - **Purchase System**: Request-to-purchase workflow with status tracking
+- **Messaging System**: Real-time communication between buyers and sellers
 - **Category & Condition Filtering**: Organized browsing by type and condition
 - **Pagination**: Efficient browsing of large item collections
+- **Admin Dashboard**: Administrative tools for platform management
 
 ## Getting Started
 1. **Register**: Create an account with your @principia.edu email
 2. **Login**: Authenticate to receive a JWT token
 3. **Authorize**: Click the ?? button below and enter your token
-4. **Start Trading**: Create listings, browse items, and request purchases
+4. **Start Trading**: Create listings, browse items, and communicate with other users
 
-## Categories
+## API Endpoints Overview
+
+### ?? Authentication (`/api/v1/auth`)
+- **POST /register** - Create new user account
+- **POST /login** - Authenticate and receive JWT token
+- **POST /refresh** - Refresh expired tokens
+
+### ?? Item Management (`/api/v1/items`)
+- **GET /search** - Search and filter items with pagination
+- **POST /** - Create new item listing
+- **GET /{id}** - Get item details
+- **PUT /{id}/status** - Update item status
+- **POST /{id}/images** - Add images to item
+- **DELETE /{id}** - Delete item (admin/owner only)
+
+### ?? Messaging (`/api/v1/messages`)
+- **POST /conversations** - Start new conversation with another user
+- **POST /send** - Send message in existing conversation
+- **GET /conversations/{id}** - Get messages from conversation (paginated)
+- **GET /inbox** - Get user's conversation list (paginated)
+
+### ?? User Management (`/api/v1/users`)
+- **GET /me** - Get current user profile
+- **PUT /me** - Update user profile
+- **POST /ban** - Ban user (admin only)
+- **POST /unban** - Unban user (admin only)
+
+### ?? Admin Dashboard (`/api/v1/admin`)
+- **GET /dashboard** - Get platform statistics and metrics
+
+## Data Reference
+
+### Categories
 - **1**: Books & Textbooks
 - **2**: Electronics
 - **3**: Furniture
 - **4**: Clothing
 - **5**: Other
 
-## Item Conditions  
-- **1**: Like New
-- **2**: Good
-- **3**: Fair
-- **4**: Poor
+### Item Conditions  
+- **1**: Like New - Excellent condition, minimal wear
+- **2**: Good - Minor signs of use, fully functional
+- **3**: Fair - Noticeable wear but still usable
+- **4**: Poor - Significant wear, may need repairs
 
-## Item Status
-- **1**: Active (available for purchase)
-- **2**: Pending (purchase requested)
-- **3**: Sold (transaction completed)
-- **4**: Withdrawn (removed from sale)
+### Item Status
+- **1**: Active - Available for purchase
+- **2**: Pending - Purchase request submitted
+- **3**: Sold - Transaction completed
+- **4**: Withdrawn - Removed from sale
+
+### Messaging Features
+- **Conversation Management**: Automatic conversation creation/retrieval
+- **Real-time Messaging**: Send and receive messages instantly
+- **Unread Tracking**: Keep track of unread messages per conversation
+- **Item Context**: Link conversations to specific marketplace items
+- **Pagination**: Efficient loading of message history
+- **Participant Validation**: Secure access control for conversations
+
+## Response Formats
+
+All API responses follow a consistent JSON format:
+- **Success**: Direct data or `{ data: {...} }` wrapper
+- **Error**: `{ error: ""message"" }` or `{ errors: [...] }` for validation
+- **Pagination**: Includes `total`, `page`, `pageSize`, `totalPages`, `hasNextPage`, `hasPreviousPage`
+
+## Rate Limiting & Security
+- JWT tokens expire after 24 hours
+- All endpoints (except auth) require valid authentication
+- Role-based access control for admin functions
+- Input validation on all request bodies
+- SQL injection protection via parameterized queries
 ",
         Contact = new OpenApiContact
         {
@@ -290,8 +346,8 @@ A RESTful API for the UniShare project, enabling students at Principia College t
 **Example:** `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...`
 
 To get a token:
-1. Use the `/api/auth/register` endpoint to create an account
-2. Use the `/api/auth/login` endpoint to authenticate  
+1. Use the `/api/v1/auth/register` endpoint to create an account
+2. Use the `/api/v1/auth/login` endpoint to authenticate  
 3. Copy the `token` value from the response
 4. Paste it in the field above (without 'Bearer ' prefix)
 5. Click **Authorize** to apply to all requests"
@@ -312,6 +368,27 @@ To get a token:
         }
     });
 
+    // Add custom operation processor for better endpoint organization
+    c.TagActionsBy(api =>
+    {
+        // Check if this is a controller-based action
+        if (api.ActionDescriptor.RouteValues.TryGetValue("controller", out var controllerName))
+        {
+            return controllerName switch
+            {
+                "Auth" => new[] { "?? Authentication" },
+                "Items" => new[] { "?? Item Management" },
+                "Messages" => new[] { "?? Messaging System" },
+                "Users" => new[] { "?? User Management" },
+                "Admin" => new[] { "?? Admin Dashboard" },
+                _ => new[] { controllerName ?? "Other" }
+            };
+        }
+        
+        // Handle minimal API endpoints
+        return new[] { "?? API Information" };
+    });
+
     // Enable XML documentation
     var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
@@ -328,8 +405,31 @@ To get a token:
         c.IncludeXmlComments(servicesXmlPath);
     }
 
-    // Order controllers and operations alphabetically
-    c.OrderActionsBy(apiDesc => $"{apiDesc.ActionDescriptor.RouteValues["controller"]}_{apiDesc.HttpMethod}");
+    // Custom ordering: Auth first, then functional endpoints, then admin
+    c.OrderActionsBy(apiDesc =>
+    {
+        // Check if this is a controller-based action
+        if (apiDesc.ActionDescriptor.RouteValues.TryGetValue("controller", out var controller) &&
+            apiDesc.ActionDescriptor.RouteValues.TryGetValue("action", out var action))
+        {
+            var method = apiDesc.HttpMethod;
+            
+            return controller switch
+            {
+                "Auth" => $"1_{controller}_{action}_{method}",
+                "Items" => $"2_{controller}_{action}_{method}",
+                "Messages" => $"3_{controller}_{action}_{method}",
+                "Users" => $"4_{controller}_{action}_{method}",
+                "Admin" => $"5_{controller}_{action}_{method}",
+                _ => $"9_{controller}_{action}_{method}"
+            };
+        }
+        
+        // Handle minimal API endpoints
+        var path = apiDesc.RelativePath ?? "/";
+        var methodName = apiDesc.HttpMethod;
+        return $"0_MinimalAPI_{path.Replace("/", "_")}_{methodName}";
+    });
 });
 
 var app = builder.Build();
@@ -342,7 +442,7 @@ if (app.Environment.IsDevelopment())
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "UniShare API V1.0");
         c.RoutePrefix = "swagger";
-        c.DocumentTitle = "UniShare API Documentation";
+        c.DocumentTitle = "UniShare API Documentation - Principia College Marketplace";
         
         // Enhanced UI configuration
         c.DefaultModelsExpandDepth(2);
@@ -350,9 +450,15 @@ if (app.Environment.IsDevelopment())
         c.DisplayRequestDuration();
         c.EnableDeepLinking();
         c.EnableValidator();
+        c.ShowExtensions();
         
         // Show the Authorize button prominently
         c.EnablePersistAuthorization();
+        
+        // Configure default expansion
+        c.DefaultModelsExpandDepth(1);
+        c.DefaultModelExpandDepth(1);
+        c.DocExpansion(Swashbuckle.AspNetCore.SwaggerUI.DocExpansion.List);
     });
 }
 
@@ -407,17 +513,38 @@ app.MapGet("/", () => new
 {
     Title = "UniShare API",
     Version = "v1.0",
-    Description = "API for the UniShare project - a platform for sharing items within the Principia College community.",
+    Description = "API for the UniShare project - a platform for sharing items and communication within the Principia College community.",
     Documentation = "/swagger",
     Status = "Online",
     Endpoints = new
     {
-        Authentication = "/api/auth",
-        Items = "/api/items",
+        Authentication = "/api/v1/auth",
+        Items = "/api/v1/items",
+        Messages = "/api/v1/messages",
+        Users = "/api/v1/users", 
+        Admin = "/api/v1/admin",
         Documentation = "/swagger"
     },
+    Features = new[]
+    {
+        "User Authentication & Authorization",
+        "Item Marketplace with Search & Filtering", 
+        "Real-time Messaging System",
+        "Purchase Request Workflow",
+        "Admin Dashboard & Management",
+        "Comprehensive API Documentation"
+    },
     SupportedFormats = new[] { "application/json" },
-    Authentication = "JWT Bearer Token"
+    Authentication = "JWT Bearer Token",
+    SampleEndpoints = new
+    {
+        Register = "POST /api/v1/auth/register",
+        Login = "POST /api/v1/auth/login", 
+        SearchItems = "GET /api/v1/items/search?q=textbook&page=1",
+        StartConversation = "POST /api/v1/messages/conversations",
+        SendMessage = "POST /api/v1/messages/send",
+        GetInbox = "GET /api/v1/messages/inbox?page=1&pageSize=20"
+    }
 }).AllowAnonymous().WithTags("API Information").WithSummary("Get API information and available endpoints");
 
 app.Run();

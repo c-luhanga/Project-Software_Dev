@@ -23,4 +23,9 @@
     <ProjectReference Include="..\UniShareProject.Repository\UniShareProject.Repository.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Swagger\" />
+    <Folder Include="wwwroot\swagger-ui\" />
+  </ItemGroup>
+
 </Project>

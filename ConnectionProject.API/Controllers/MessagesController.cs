@@ -76,7 +76,7 @@ public class MessagesController : BaseApiController
         catch (UnauthorizedAccessException ex)
         {
             Logger.LogWarning(ex, "[Messages] Unauthorized attempt to start conversation");
-            return Forbid(ex.Message);
+            return StatusCode(403, new { Error = ex.Message });
         }
     }
 
@@ -126,7 +126,7 @@ public class MessagesController : BaseApiController
         {
             Logger.LogWarning(ex, "[Messages] Unauthorized attempt to send message to conversation {ConversationId}", 
                 request.ConversationId);
-            return Forbid(ex.Message);
+            return StatusCode(403, new { Error = ex.Message });
         }
         catch (ArgumentException ex)
         {
@@ -202,7 +202,7 @@ public class MessagesController : BaseApiController
         catch (UnauthorizedAccessException ex)
         {
             Logger.LogWarning(ex, "[Messages] Unauthorized attempt to access conversation {ConversationId}", conversationId);
-            return Forbid(ex.Message);
+            return StatusCode(403, new { Error = ex.Message });
         }
         catch (ArgumentException ex)
         {
