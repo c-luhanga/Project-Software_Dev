@@ -99,7 +99,8 @@ public class AuthService : IAuthService
             Token: token,
             UserId: user.UserId,
             Email: user.Email,
-            Name: $"{user.FirstName} {user.LastName}".Trim()
+            Name: $"{user.FirstName} {user.LastName}".Trim(),
+            IsAdmin: user.IsAdmin
         );
     }
 

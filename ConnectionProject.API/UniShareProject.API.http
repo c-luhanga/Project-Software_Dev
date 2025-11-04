@@ -1355,3 +1355,8 @@ Authorization: Bearer {{authToken}}
 ### TOTAL TEST CASES: 134+
 ###
 ### ========================================================================
+
+GET {{UniShareProject.API_HostAddress}}/
+Authorization: bearer {{$bearerToken}}
+
+###

@@ -25,6 +25,13 @@ using System.Reflection;
 using Microsoft.AspNetCore.Authorization;
 using UniShareProject.API.Authorization; // Ensure this namespace exists for your custom handler
 
+// Ensure wwwroot directory exists (required by Microsoft.NET.Sdk.Web even for pure APIs)
+var wwwrootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+if (!Directory.Exists(wwwrootPath))
+{
+    Directory.CreateDirectory(wwwrootPath);
+}
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.Configure<UniShareProject.services.Settings.JwtSettings>(builder.Configuration.GetSection("Jwt"));
@@ -461,9 +468,6 @@ if (app.Environment.IsDevelopment())
         c.DocExpansion(Swashbuckle.AspNetCore.SwaggerUI.DocExpansion.List);
     });
 }
-
-// Enable static files for serving custom CSS and other assets
-app.UseStaticFiles();
 
 app.UseHttpsRedirection();
 

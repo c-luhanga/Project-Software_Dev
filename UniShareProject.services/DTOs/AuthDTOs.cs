@@ -64,6 +64,7 @@ public record LoginRequest(
 /// <param name="UserId">Unique user identifier</param>
 /// <param name="Email">User's email address</param>
 /// <param name="Name">User's full name</param>
+/// <param name="IsAdmin">Whether the user has admin privileges</param>
 public record LoginResponse(
     [property: Description("JWT bearer token for API authentication")]
     string Token,
@@ -73,7 +74,10 @@ public record LoginResponse(
     
     [property: Description("User's email address")]
     string Email,
-    
+  
     [property: Description("User's full name")]
-    string Name
+    string Name,
+    
+    [property: Description("Whether the user has admin privileges")]
+    bool IsAdmin
 );

@@ -6,6 +6,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);1591</NoWarn>
+    <EnableDefaultContentItems>false</EnableDefaultContentItems>
+    <StaticWebAssetBasePath>/</StaticWebAssetBasePath>
   </PropertyGroup>
 
   <ItemGroup>
@@ -25,7 +27,6 @@
 
   <ItemGroup>
     <Folder Include="Swagger\" />
-    <Folder Include="wwwroot\swagger-ui\" />
   </ItemGroup>
 
 </Project>

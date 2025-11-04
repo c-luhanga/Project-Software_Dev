@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using UniShareProject.services.Interfaces;
 using UniShareProject.services.Models;
+using UniShareProject.Repository.Models;
 using ConnectionProject.API.Controllers.Base;
 
 namespace ConnectionProject.API.Controllers;
@@ -18,6 +19,48 @@ public class ItemsController : BaseApiController
     public ItemsController(IItemService itemService, ILogger<ItemsController> logger) : base(logger)
     {
         _itemService = itemService;
+    }
+
+    /// <summary>
+    /// Get all items posted by the current logged-in user
+    /// </summary>
+    /// <remarks>
+    /// Retrieves all items that the currently authenticated user has posted to the marketplace.
+    /// This includes items in all statuses (Active, Pending, Sold, Withdrawn).
+    /// 
+    /// Sample request:
+    /// 
+    ///     GET /api/items/my-items
+    ///     Authorization: Bearer {token}
+    /// 
+    /// The user ID is automatically extracted from the JWT token.
+    /// This endpoint is useful for:
+    /// - Viewing your own listings
+    /// - Managing your posted items
+    /// - Checking the status of your sales
+    /// </remarks>
+    /// <param name="ct">Cancellation token</param>
+    /// <returns>List of items posted by the current user</returns>
+    /// <response code="200">Items retrieved successfully (returns empty array if no items found)</response>
+    /// <response code="401">Authentication required</response>
+    /// <response code="500">Internal server error</response>
+    [HttpGet("my-items")]
+    [Authorize]
+    [ProducesResponseType(typeof(IEnumerable<Item>), 200)]
+    [ProducesResponseType(typeof(object), 401)]
+    [ProducesResponseType(typeof(object), 500)]
+    public async Task<IActionResult> GetMyItems(CancellationToken ct)
+    {
+        var userId = GetCurrentUserId();
+        
+        Logger.LogInformation("User {UserId} retrieving their posted items", userId);
+        
+        var items = await _itemService.GetByUserIdAsync(userId);
+        
+        var itemList = items.ToList();
+        Logger.LogInformation("User {UserId} has {ItemCount} posted items", userId, itemList.Count);
+        
+        return Ok(itemList);
     }
 
     /// <summary>
