@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using UniShareProject.services.Interfaces;
 using UniShareProject.services.Models;
 using UniShareProject.Repository.Models;
+using UniShareProject.Repository.Repositories;
 using ConnectionProject.API.Controllers.Base;
 
 namespace ConnectionProject.API.Controllers;
@@ -15,10 +16,14 @@ namespace ConnectionProject.API.Controllers;
 public class ItemsController : BaseApiController
 {
     private readonly IItemService _itemService;
+    private readonly IFileUploadService _fileUploadService;
+    private readonly IItemImageRepository _itemImageRepository;
 
-    public ItemsController(IItemService itemService, ILogger<ItemsController> logger) : base(logger)
+    public ItemsController(IItemService itemService, IFileUploadService fileUploadService, IItemImageRepository itemImageRepository, ILogger<ItemsController> logger) : base(logger)
     {
         _itemService = itemService;
+        _fileUploadService = fileUploadService;
+        _itemImageRepository = itemImageRepository;
     }
 
     /// <summary>
@@ -286,6 +291,149 @@ public class ItemsController : BaseApiController
             id, statusId, actorId);
         
         return Ok(updatedItem);
+    }
+
+    /// <summary>
+    /// Upload image files to an existing item
+    /// </summary>
+    /// <remarks>
+    /// Upload 1-4 actual image files to an existing item. Requires authentication and authorization (item owner or admin).
+    /// This is the NEW file upload endpoint that handles actual file uploads, not just URLs.
+    /// 
+    /// This action:
+    /// - Validates that the authenticated user is the seller of the item or an admin
+    /// - Validates uploaded files (type, size, format)
+    /// - Stores files securely on the server or cloud storage
+    /// - Automatically generates public URLs for the uploaded images
+    /// - Ensures the total number of images (existing + new) does not exceed 4
+    /// - Returns all image URLs for the item after uploading
+    /// 
+    /// Sample request (multipart/form-data):
+    /// 
+    ///     POST /api/items/123/upload-images
+    ///     Content-Type: multipart/form-data
+    ///     Authorization: Bearer {token}
+    ///     
+    ///     Form Data:
+    ///     files: [image1.jpg, image2.png, image3.webp]
+    /// 
+    /// Supported file types: JPG, JPEG, PNG, GIF, WebP, BMP
+    /// Maximum file size: 5MB per file
+    /// Maximum total images per item: 4
+    /// </remarks>
+    /// <param name="id">Item ID to upload images to</param>
+    /// <param name="files">Image files to upload (1-4 files)</param>
+    /// <param name="ct">Cancellation token</param>
+    /// <returns>All image URLs for the item after uploading</returns>
+    /// <response code="200">Images uploaded successfully</response>
+    /// <response code="400">Invalid files, file validation errors, or no files provided</response>
+    /// <response code="401">Authentication required</response>
+    /// <response code="403">Not authorized to upload images to this item</response>
+    /// <response code="404">Item not found</response>
+    /// <response code="409">Would exceed maximum of 4 images per item</response>
+    /// <response code="413">File too large</response>
+    /// <response code="415">Unsupported file type</response>
+    /// <response code="500">Internal server error or upload failure</response>
+    [HttpPost("{id:int}/upload-images")]
+    [Authorize]
+    [Authorize(Policy = "ItemOwnerOrAdmin")]
+    [ProducesResponseType(typeof(IReadOnlyList<string>), 200)]
+    [ProducesResponseType(typeof(object), 400)]
+    [ProducesResponseType(typeof(object), 401)]
+    [ProducesResponseType(typeof(object), 403)]
+    [ProducesResponseType(typeof(object), 404)]
+    [ProducesResponseType(typeof(object), 409)]
+    [ProducesResponseType(typeof(object), 413)]
+    [ProducesResponseType(typeof(object), 415)]
+    [ProducesResponseType(typeof(object), 500)]
+    public async Task<IActionResult> UploadItemImages(int id, [FromForm] IList<IFormFile> files, CancellationToken ct)
+    {
+        var actorId = GetCurrentUserId();
+
+        // Validate basic input
+        if (files == null || files.Count == 0)
+        {
+            return BadRequest(new { error = "At least one image file is required" });
+        }
+
+        if (files.Count > 4)
+        {
+            return BadRequest(new { error = "Maximum 4 files allowed per upload" });
+        }
+
+        try
+        {
+            Logger.LogInformation("Starting file upload for item {ItemId} by user {ActorId}. File count: {FileCount}", 
+                id, actorId, files.Count);
+
+            // Validate all files before uploading any
+            foreach (var file in files)
+            {
+                if (!_fileUploadService.IsValidImageFile(file))
+                {
+                    var maxSizeMB = _fileUploadService.GetMaxFileSizeBytes() / (1024.0 * 1024.0);
+                    var supportedTypes = string.Join(", ", _fileUploadService.GetSupportedExtensions());
+                    
+                    return BadRequest(new { 
+                        error = $"Invalid file: {file.FileName}",
+                        details = $"File must be an image, max {maxSizeMB:F1}MB, supported types: {supportedTypes}"
+                    });
+                }
+            }
+
+            // Check current item exists and user has permission (this will be validated by the service)
+            var item = await _itemService.GetAsync(id, ct);
+            if (item == null)
+            {
+                return NotFound(new { error = $"Item with ID {id} not found" });
+            }
+
+            // Check image count limit using the repository to get current count
+            var currentImageCount = await _itemImageRepository.CountByItemAsync(id, ct);
+            var totalAfterUpload = currentImageCount + files.Count;
+            
+            if (totalAfterUpload > 4)
+            {
+                return Conflict(new { 
+                    error = $"Cannot upload {files.Count} files. Item already has {currentImageCount} images. Maximum allowed is 4 total.",
+                    currentImageCount,
+                    requestedUpload = files.Count,
+                    maximumAllowed = 4
+                });
+            }
+
+            // Upload files and get URLs
+            var uploadedUrls = await _fileUploadService.UploadImagesAsync(files, id, ct);
+
+            // Create request to add URLs to database
+            var addImagesRequest = new AddItemImagesRequest(uploadedUrls.ToList());
+            var allImageUrls = await _itemService.AddImagesAsync(id, actorId, addImagesRequest, ct);
+
+            Logger.LogInformation("Successfully uploaded {UploadCount} files for item {ItemId} by user {ActorId}. Total images: {TotalCount}", 
+                uploadedUrls.Count, id, actorId, allImageUrls.Count);
+
+            return Ok(allImageUrls);
+        }
+        catch (ArgumentException ex)
+        {
+            Logger.LogWarning("File validation error for item {ItemId}: {Error}", id, ex.Message);
+            return BadRequest(new { error = ex.Message });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            Logger.LogWarning("Unauthorized upload attempt for item {ItemId} by user {ActorId}: {Error}", id, actorId, ex.Message);
+            return Forbid();
+        }
+        catch (InvalidOperationException ex)
+        {
+            Logger.LogError(ex, "Upload operation failed for item {ItemId} by user {ActorId}", id, actorId);
+            return StatusCode(500, new { error = "Upload failed", details = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Unexpected error during upload for item {ItemId} by user {ActorId}", id, actorId);
+            return StatusCode(500, new { error = "An unexpected error occurred during upload" });
+        }
     }
 
     /// <summary>

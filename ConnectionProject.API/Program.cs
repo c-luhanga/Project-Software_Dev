@@ -36,6 +36,21 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.Configure<UniShareProject.services.Settings.JwtSettings>(builder.Configuration.GetSection("Jwt"));
 
+// Configure file upload options
+builder.Services.Configure<UniShareProject.services.Interfaces.FileUploadOptions>(options =>
+{
+    options.MaxFileSizeBytes = 5 * 1024 * 1024; // 5MB
+    options.SupportedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp" };
+    options.SupportedMimeTypes = new[] { 
+        "image/jpeg", 
+        "image/png", 
+        "image/gif", 
+        "image/webp", 
+        "image/bmp" 
+    };
+    options.StorageProvider = "Local"; // Can be changed to "S3", "Azure", etc.
+});
+
 // Bind Database settings (expects section: ConnectionStrings:DefaultConnection)
 builder.Services.Configure<DatabaseSettings>(options =>
 {
@@ -120,6 +135,9 @@ builder.Services.AddScoped<IAuthService, UniShareProject.services.Implementation
 builder.Services.AddScoped<IItemService, UniShareProject.services.Implementations.ItemService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IMessagingService, MessagingService>();
+
+// File Upload Services - Register based on configuration
+builder.Services.AddScoped<IFileUploadService, UniShareProject.services.Implementations.LocalFileUploadService>();
 
 // JWT Authentication
 var jwtSettings = builder.Configuration.GetSection("Jwt").Get<UniShareProject.services.Settings.JwtSettings>()!;
@@ -470,6 +488,26 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Configure static file serving for uploaded images
+app.UseStaticFiles(); // Default wwwroot serving
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(
+        Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads")),
+    RequestPath = "/uploads",
+    OnPrepareResponse = ctx =>
+    {
+        // Add security headers for image files
+        ctx.Context.Response.Headers["X-Content-Type-Options"] = "nosniff";
+        ctx.Context.Response.Headers["X-Frame-Options"] = "DENY";
+        
+        // Set cache headers for better performance
+        var cache = TimeSpan.FromDays(30);
+        ctx.Context.Response.Headers["Cache-Control"] = $"public, max-age={cache.TotalSeconds}";
+        ctx.Context.Response.Headers["Expires"] = DateTime.UtcNow.Add(cache).ToString("R");
+    }
+});
 
 // Add exception handling middleware early in the pipeline
 app.UseMiddleware<ExceptionHandlingMiddleware>();
