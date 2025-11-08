@@ -32,6 +32,13 @@ if (!Directory.Exists(wwwrootPath))
     Directory.CreateDirectory(wwwrootPath);
 }
 
+// Ensure uploads directory exists for static file serving
+var uploadsPath = Path.Combine(wwwrootPath, "uploads");
+if (!Directory.Exists(uploadsPath))
+{
+    Directory.CreateDirectory(uploadsPath);
+}
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.Configure<UniShareProject.services.Settings.JwtSettings>(builder.Configuration.GetSection("Jwt"));
