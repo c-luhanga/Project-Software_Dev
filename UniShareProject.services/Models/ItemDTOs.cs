@@ -168,6 +168,12 @@ public class ItemDto
     [Description("Collection of image URLs for this item")]
     public List<string> Images { get; set; } = new List<string>();
 
+    /// <summary>
+    /// First image URL to use as thumbnail (computed from Images)
+    /// </summary>
+    [Description("First image URL to use as thumbnail")]
+    public string? ThumbnailUrl => Images?.FirstOrDefault();
+
     // Parameterless constructor for AutoMapper
     public ItemDto() { }
 

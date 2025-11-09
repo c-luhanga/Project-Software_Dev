@@ -65,7 +65,14 @@ public class ItemService : IItemService
             pageSpec, 
             ct);
         
-        var itemDtos = _mapper.Map<IEnumerable<ItemDto>>(pagedResult.Items);
+        var itemDtos = _mapper.Map<IEnumerable<ItemDto>>(pagedResult.Items).ToList();
+        
+        // Load images for each item (including thumbnails)
+        foreach (var itemDto in itemDtos)
+        {
+            var imageUrls = await _itemImageRepository.GetUrlsAsync(itemDto.Id, ct);
+            itemDto.Images = imageUrls.ToList();
+        }
         
         return new PagedResultDto<ItemDto>(
             itemDtos,
