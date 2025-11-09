@@ -162,6 +162,12 @@ public class ItemDto
     [Description("Date and time when item was posted")]
     public DateTime PostedDate { get; set; }
 
+    /// <summary>
+    /// Collection of image URLs for this item
+    /// </summary>
+    [Description("Collection of image URLs for this item")]
+    public List<string> Images { get; set; } = new List<string>();
+
     // Parameterless constructor for AutoMapper
     public ItemDto() { }
 

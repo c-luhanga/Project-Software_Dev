@@ -42,7 +42,16 @@ public class ItemService : IItemService
     public async Task<ItemDto?> GetAsync(int id, CancellationToken ct)
     {
         var item = await _itemRepository.GetByIdAsync(id, ct);
-        return item != null ? _mapper.Map<ItemDto>(item) : null;
+        if (item == null) return null;
+
+        // Map item to DTO
+        var itemDto = _mapper.Map<ItemDto>(item);
+
+        // Load images for this item
+        var imageUrls = await _itemImageRepository.GetUrlsAsync(id, ct);
+        itemDto.Images = imageUrls.ToList();
+
+        return itemDto;
     }
 
     public async Task<PagedResultDto<ItemDto>> SearchAsync(SearchItemsRequest req, CancellationToken ct)
