@@ -158,12 +158,15 @@ public class ItemService : IItemService
                 await _itemImageRepository.InsertAsync(itemId, url, ct);
             }
 
-            // Step 5: CommitAsync() and return all image URLs via GetUrlsAsync
+            // Step 5: Commit the transaction
+            await unitOfWork.CommitAsync();
+
+            // Step 6: Return all image URLs via GetUrlsAsync
             return await _itemImageRepository.GetUrlsAsync(itemId, ct);
         }
         catch
         {
-            // If anything goes wrong, the individual repository methods handle their own transactions
+            // If anything goes wrong, the transaction will be rolled back automatically
             throw;
         }
     }
