@@ -27,6 +27,13 @@ public class AddItemImagesRequestValidator : AbstractValidator<AddItemImagesRequ
 
     private static bool BeAValidAbsoluteUrl(string url)
     {
+        if (string.IsNullOrWhiteSpace(url))
+            return false;
+            
+        // Allow blob URLs for local file previews (temporary solution)
+        if (url.StartsWith("blob:", StringComparison.OrdinalIgnoreCase))
+            return true;
+            
         return Uri.TryCreate(url, UriKind.Absolute, out var uri) && 
                (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps);
     }
