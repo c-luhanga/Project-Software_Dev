@@ -43,6 +43,44 @@ public record CreateItemRequest(
 );
 
 /// <summary>
+/// Request model for updating an existing item
+/// </summary>
+/// <param name="Title">Updated item title (3-100 characters, optional)</param>
+/// <param name="Description">Updated item description (10-4000 characters, optional)</param>
+/// <param name="CategoryId">Updated category ID (optional): 1=Books, 2=Electronics, 3=Furniture, 4=Clothing, 5=Other</param>
+/// <param name="Price">Updated item price in USD (optional, must be >= 0)</param>
+/// <param name="ConditionId">Updated condition ID (optional): 1=Like New, 2=Good, 3=Fair, 4=Poor</param>
+/// <example>
+/// {
+///   "title": "Updated Calculus Textbook",
+///   "description": "Updated description with new condition details",
+///   "categoryId": 1,
+///   "price": 65.00,
+///   "conditionId": 2
+/// }
+/// </example>
+public record UpdateItemRequest(
+    [property: StringLength(100, MinimumLength = 3)]
+    [property: Description("Updated item title (3-100 characters, optional)")]
+    string? Title = null,
+
+    [property: StringLength(4000, MinimumLength = 10)]
+    [property: Description("Updated detailed item description (10-4000 characters, optional)")]
+    string? Description = null,
+
+    [property: Description("Updated category ID (optional): 1=Books, 2=Electronics, 3=Furniture, 4=Clothing, 5=Other")]
+    int? CategoryId = null,
+
+    [property: Range(0, double.MaxValue)]
+    [property: Description("Updated item price in USD (optional, must be >= 0)")]
+    decimal? Price = null,
+
+    [property: Range(1, 4)]
+    [property: Description("Updated condition ID (optional): 1=Like New, 2=Good, 3=Fair, 4=Poor")]
+    byte? ConditionId = null
+);
+
+/// <summary>
 /// Request model for adding images to an item
 /// </summary>
 /// <param name="ImageUrls">List of image URLs to add (1-4 URLs required)</param>

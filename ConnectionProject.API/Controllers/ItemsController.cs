@@ -294,6 +294,80 @@ public class ItemsController : BaseApiController
     }
 
     /// <summary>
+    /// Update an existing item
+    /// </summary>
+    /// <remarks>
+    /// Update an existing item's details. Requires authentication and authorization (item owner or admin).
+    /// 
+    /// This action:
+    /// - Validates that the authenticated user is the seller of the item or an admin
+    /// - Updates only the fields provided in the request (partial update)
+    /// - Preserves fields not included in the request
+    /// - Does not change seller ID, status, or posted date
+    /// - Returns the updated item with current images
+    /// 
+    /// Sample request:
+    /// 
+    ///     PUT /api/items/123
+    ///     {
+    ///        "title": "Updated Calculus Textbook",
+    ///        "description": "Updated description with new condition details",
+    ///        "categoryId": 1,
+    ///        "price": 65.00,
+    ///        "conditionId": 2
+    ///     }
+    /// 
+    /// All fields are optional. Only provided fields will be updated.
+    /// </remarks>
+    /// <param name="id">Item ID to update</param>
+    /// <param name="request">Update request containing new values</param>
+    /// <param name="ct">Cancellation token</param>
+    /// <returns>Updated item details</returns>
+    /// <response code="200">Item updated successfully</response>
+    /// <response code="400">Invalid request data or validation errors</response>
+    /// <response code="401">Authentication required</response>
+    /// <response code="403">Not authorized to update this item</response>
+    /// <response code="404">Item not found</response>
+    /// <response code="500">Internal server error</response>
+    [HttpPut("{id:int}")]
+    [Authorize]
+    [Authorize(Policy = "ItemOwnerOrAdmin")]
+    [ProducesResponseType(typeof(ItemDto), 200)]
+    [ProducesResponseType(typeof(object), 400)]
+    [ProducesResponseType(typeof(object), 401)]
+    [ProducesResponseType(typeof(object), 403)]
+    [ProducesResponseType(typeof(object), 404)]
+    [ProducesResponseType(typeof(object), 500)]
+    public async Task<IActionResult> UpdateItem(int id, [FromBody] UpdateItemRequest request, CancellationToken ct)
+    {
+        var validationResult = ValidateModelState();
+        if (validationResult != null)
+            return validationResult;
+
+        var actorId = GetCurrentUserId();
+
+        try 
+        {
+            var updatedItem = await _itemService.UpdateAsync(id, request, actorId, ct);
+            
+            Logger.LogInformation("Item updated successfully. ItemId: {ItemId}, Actor: {ActorId}", 
+                id, actorId);
+            
+            return Ok(updatedItem);
+        }
+        catch (InvalidOperationException ex)
+        {
+            Logger.LogWarning("Item update failed: {Error}", ex.Message);
+            return NotFound(new { error = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Unexpected error updating item {ItemId}", id);
+            return StatusCode(500, new { error = "An unexpected error occurred" });
+        }
+    }
+
+    /// <summary>
     /// Upload image files to an existing item
     /// </summary>
     /// <remarks>

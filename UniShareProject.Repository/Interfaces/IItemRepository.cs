@@ -8,6 +8,7 @@ public interface IItemRepository
     // New required methods
     Task<int> InsertAsync(Item e, CancellationToken ct);
     Task<Item?> GetByIdAsync(int id, CancellationToken ct);
+    Task<int> UpdateAsync(Item item, CancellationToken ct);
     Task<int> UpdateStatusAsync(int id, byte statusId, CancellationToken ct);
     Task<PagedResult<Item>> SearchAsync(int? categoryId, byte? statusId, byte? conditionId, string? q, PageSpec page, CancellationToken ct);
     Task<(int SellerId, byte StatusId)?> GetSellerAndStatusAsync(int id, CancellationToken ct);

@@ -50,6 +50,32 @@ public class ItemRepository : IItemRepository
         return await unitOfWork.Connection.QueryFirstOrDefaultAsync<Item>(ItemQueries.GetById, new { Id = id }, unitOfWork.Transaction);
     }
 
+    public async Task<int> UpdateAsync(Item item, CancellationToken ct)
+    {
+        await using var unitOfWork = _unitOfWorkFactory.Create();
+        
+        try
+        {
+            var p = new DynamicParameters();
+            p.Add("ItemID", item.ItemID);
+            p.Add("Title", item.Title);
+            p.Add("Description", item.Description);
+            p.Add("CategoryID", item.CategoryID);
+            p.Add("Price", item.Price);
+            p.Add("ConditionID", item.ConditionID);
+            p.Add("StatusID", item.StatusID);
+
+            var affectedRows = await unitOfWork.Connection.ExecuteAsync(ItemQueries.Update, p, unitOfWork.Transaction);
+            await unitOfWork.CommitAsync();
+            return affectedRows;
+        }
+        catch
+        {
+            await unitOfWork.RollbackAsync();
+            throw;
+        }
+    }
+
     public async Task<(int SellerId, byte StatusId)?> GetSellerAndStatusAsync(int id, CancellationToken ct)
     {
         await using var unitOfWork = _unitOfWorkFactory.Create();

@@ -39,6 +39,49 @@ public class ItemService : IItemService
         return _mapper.Map<ItemDto>(item);
     }
 
+    public async Task<ItemDto> UpdateAsync(int id, UpdateItemRequest req, int actorId, CancellationToken ct)
+    {
+        // Get the existing item to verify ownership/permissions
+        var existingItem = await _itemRepository.GetByIdAsync(id, ct);
+        if (existingItem == null)
+        {
+            throw new InvalidOperationException($"Item with ID {id} not found");
+        }
+
+        // TODO: Add authorization check - only item owner or admin can update
+        // For now, we'll proceed with the update
+        
+        // Create updated item with only the fields that were provided
+        var updatedItem = new Item
+        {
+            ItemID = existingItem.ItemID,
+            Title = req.Title ?? existingItem.Title,
+            Description = req.Description ?? existingItem.Description,
+            CategoryID = req.CategoryId ?? existingItem.CategoryID,
+            Price = req.Price ?? existingItem.Price,
+            ConditionID = req.ConditionId ?? existingItem.ConditionID,
+            SellerID = existingItem.SellerID, // Never change seller
+            StatusID = existingItem.StatusID, // Don't change status via update
+            PostedDate = existingItem.PostedDate // Keep original posted date
+        };
+
+        var affectedRows = await _itemRepository.UpdateAsync(updatedItem, ct);
+        
+        if (affectedRows == 0)
+        {
+            throw new InvalidOperationException($"Item with ID {id} could not be updated");
+        }
+
+        // Get the updated item with images
+        var result = await GetAsync(id, ct);
+        if (result == null)
+        {
+            throw new InvalidOperationException($"Item with ID {id} not found after update");
+        }
+
+        return result;
+    }
+
     public async Task<ItemDto?> GetAsync(int id, CancellationToken ct)
     {
         var item = await _itemRepository.GetByIdAsync(id, ct);

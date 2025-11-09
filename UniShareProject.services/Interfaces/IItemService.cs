@@ -9,6 +9,7 @@ public interface IItemService
     Task<ItemDto> CreateAsync(CreateItemRequest req, int sellerId, CancellationToken ct);
     Task<ItemDto?> GetAsync(int id, CancellationToken ct);
     Task<PagedResultDto<ItemDto>> SearchAsync(SearchItemsRequest req, CancellationToken ct);
+    Task<ItemDto> UpdateAsync(int id, UpdateItemRequest req, int actorId, CancellationToken ct);
     Task<ItemDto> UpdateStatusAsync(int id, byte statusId, int actorId, CancellationToken ct);
     Task<ItemDto> RequestPurchaseAsync(int id, int buyerId, CancellationToken ct);
     Task<IReadOnlyList<string>> AddImagesAsync(int itemId, int actorId, AddItemImagesRequest req, CancellationToken ct);
