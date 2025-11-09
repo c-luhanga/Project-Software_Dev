@@ -1,6 +1,8 @@
 // This file now serves as re-exports to maintain backward compatibility
 // All actual entity definitions are now in UniShareProject.DataBases.Entities
 
+using System.Text.Json.Serialization;
+
 namespace UniShareProject.Repository.Models;
 
 public class Item
@@ -8,13 +10,15 @@ public class Item
     // Primary key - matches database ItemID field
     public int ItemID { get; set; }
     
-    // Backward compatibility
+    // Backward compatibility - ignore during JSON serialization
+    [JsonIgnore]
     public int Id 
     { 
         get => ItemID; 
         set => ItemID = value; 
     }
     
+    [JsonIgnore]
     public int ItemId 
     { 
         get => ItemID; 
