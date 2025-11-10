@@ -295,7 +295,16 @@ public class ItemService : IItemService
         var items = await _itemRepository.GetByUserIdAsync(userId, unitOfWork);
         
         // Map entities to DTOs using AutoMapper
-        return items.Select(item => _mapper.Map<ItemDto>(item));
+        var itemDtos = items.Select(item => _mapper.Map<ItemDto>(item)).ToList();
+        
+        // Load images for each item
+        foreach (var itemDto in itemDtos)
+        {
+            var imageUrls = await _itemImageRepository.GetUrlsAsync(itemDto.Id, ct);
+            itemDto.Images = imageUrls.ToList();
+        }
+        
+        return itemDtos;
     }
 
     // Legacy methods for backward compatibility
