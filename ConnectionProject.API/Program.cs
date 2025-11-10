@@ -92,9 +92,21 @@ builder.Services.AddCors(options =>
     // Alternative: More permissive policy for development (use carefully)
     options.AddPolicy("DevelopmentPolicy", policy =>
     {
-        policy.AllowAnyOrigin()
+        policy.WithOrigins(
+                "http://localhost:3000",     // React development server
+                "http://localhost:3001",     // Alternative React port
+                "http://localhost:4200",     // Angular development server
+                "http://localhost:5173",     // Vite development server
+                "http://localhost:8080",     // Vue.js development server
+                "https://localhost:3000",    // HTTPS versions
+                "https://localhost:3001",
+                "https://localhost:4200",
+                "https://localhost:5173",
+                "https://localhost:8080"
+            )
             .AllowAnyMethod()
-            .AllowAnyHeader();
+            .AllowAnyHeader()
+            .AllowCredentials(); // Required for SignalR
     });
 });
 
