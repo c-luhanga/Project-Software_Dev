@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <system.webServer>
+    <handlers>
+      <add name="aspNetCore" path="*" verb="*" modules="AspNetCoreModuleV2" resourceType="Unspecified"/>
+    </handlers>
+    <aspNetCore processPath="dotnet" 
+                arguments="UniShareProject.API.dll" 
+                stdoutLogEnabled="true" 
+                stdoutLogFile=".\logs\stdout" 
+                hostingModel="InProcess">
+      <environmentVariables>
+        <environmentVariable name="ASPNETCORE_ENVIRONMENT" value="Production" />
+      </environmentVariables>
+    </aspNetCore>
+    
+    <!-- Security headers -->
+    <httpProtocol>
+      <customHeaders>
+        <add name="X-Content-Type-Options" value="nosniff" />
+        <add name="X-Frame-Options" value="DENY" />
+        <add name="X-XSS-Protection" value="1; mode=block" />
+        <add name="Referrer-Policy" value="strict-origin-when-cross-origin" />
+      </customHeaders>
+    </httpProtocol>
+    
+    <!-- Enable compression -->
+    <urlCompression doStaticCompression="true" doDynamicCompression="true" />
+    
+    <!-- Handle CORS preflight requests -->
+    <rewrite>
+      <rules>
+        <rule name="Handle CORS preflight" stopProcessing="true">
+          <match url=".*" />
+          <conditions>
+            <add input="{REQUEST_METHOD}" pattern="OPTIONS" ignoreCase="true" />
+          </conditions>
+          <action type="CustomResponse" statusCode="200" statusReason="OK" statusDescription="CORS Preflight" />
+        </rule>
+      </rules>
+    </rewrite>
+    
+    <!-- Static file handling for uploads -->
+    <staticContent>
+      <mimeMap fileExtension=".webp" mimeType="image/webp" />
+    </staticContent>
+    
+  </system.webServer>
+</configuration>
