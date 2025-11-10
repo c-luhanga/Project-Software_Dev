@@ -287,6 +287,17 @@ public class ItemService : IItemService
         return affectedRows > 0;
     }
 
+    public async Task<IEnumerable<ItemDto>> GetMyItemsAsync(int userId, CancellationToken ct)
+    {
+        // Use the new repository method that supports CancellationToken
+        // Get user items from repository
+        await using var unitOfWork = _unitOfWorkFactory.Create();
+        var items = await _itemRepository.GetByUserIdAsync(userId, unitOfWork);
+        
+        // Map entities to DTOs using AutoMapper
+        return items.Select(item => _mapper.Map<ItemDto>(item));
+    }
+
     // Legacy methods for backward compatibility
     public async Task<Item?> GetByIdAsync(int id)
     {

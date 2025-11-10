@@ -51,7 +51,7 @@ public class ItemsController : BaseApiController
     /// <response code="500">Internal server error</response>
     [HttpGet("my-items")]
     [Authorize]
-    [ProducesResponseType(typeof(IEnumerable<Item>), 200)]
+    [ProducesResponseType(typeof(IEnumerable<ItemDto>), 200)]
     [ProducesResponseType(typeof(object), 401)]
     [ProducesResponseType(typeof(object), 500)]
     public async Task<IActionResult> GetMyItems(CancellationToken ct)
@@ -60,7 +60,7 @@ public class ItemsController : BaseApiController
         
         Logger.LogInformation("User {UserId} retrieving their posted items", userId);
         
-        var items = await _itemService.GetByUserIdAsync(userId);
+        var items = await _itemService.GetMyItemsAsync(userId, ct);
         
         var itemList = items.ToList();
         Logger.LogInformation("User {UserId} has {ItemCount} posted items", userId, itemList.Count);

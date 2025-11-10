@@ -15,6 +15,7 @@ public interface IItemService
     Task<IReadOnlyList<string>> AddImagesAsync(int itemId, int actorId, AddItemImagesRequest req, CancellationToken ct);
     Task<ItemDto> MarkSoldAsync(int id, int actorId, CancellationToken ct);
     Task<bool> AdminDeleteAsync(int id, int adminId, CancellationToken ct);
+    Task<IEnumerable<ItemDto>> GetMyItemsAsync(int userId, CancellationToken ct);
 
     // Legacy methods for backward compatibility
     Task<Item?> GetByIdAsync(int id);
