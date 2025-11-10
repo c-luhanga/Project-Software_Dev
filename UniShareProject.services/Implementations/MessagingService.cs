@@ -19,6 +19,7 @@ public class MessagingService : IMessagingService
     private readonly IUnitOfWorkFactory _unitOfWorkFactory;
     private readonly IMapper _mapper;
     private readonly ILogger<MessagingService> _logger;
+    private readonly IRealTimeNotificationService? _realTimeNotificationService;
 
     public MessagingService(
         UniShareProject.Repository.Abstractions.IConversationRepository conversationRepository,
@@ -26,7 +27,8 @@ public class MessagingService : IMessagingService
         UniShareProject.Repository.Repositories.IMessageRepository legacyMessageRepository,
         IUnitOfWorkFactory unitOfWorkFactory,
         IMapper mapper,
-        ILogger<MessagingService> logger)
+        ILogger<MessagingService> logger,
+        IRealTimeNotificationService? realTimeNotificationService = null)
     {
         _conversationRepository = conversationRepository;
         _messageRepository = messageRepository;
@@ -34,6 +36,7 @@ public class MessagingService : IMessagingService
         _unitOfWorkFactory = unitOfWorkFactory;
         _mapper = mapper;
         _logger = logger;
+        _realTimeNotificationService = realTimeNotificationService;
     }
 
     public async Task<int> StartConversationAsync(StartConversationRequest req, int starterUserId, CancellationToken ct)
@@ -98,7 +101,24 @@ public class MessagingService : IMessagingService
             _logger.LogInformation("User {SenderId} sent message {MessageId} in conversation {ConversationId}", 
                 senderId, messageId, req.ConversationId);
             
-            return _mapper.Map<MessageDto>(insertedMessage);
+            var messageDto = _mapper.Map<MessageDto>(insertedMessage);
+            
+            // Send real-time notification if available
+            if (_realTimeNotificationService != null)
+            {
+                try
+                {
+                    await _realTimeNotificationService.NotifyNewMessageAsync(req.ConversationId, messageDto, ct);
+                    _logger.LogDebug("Real-time notification sent for message {MessageId}", messageId);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to send real-time notification for message {MessageId}", messageId);
+                    // Don't fail the message send if notification fails
+                }
+            }
+            
+            return messageDto;
         }
         catch
         {

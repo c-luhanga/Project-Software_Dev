@@ -21,6 +21,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System.Security.Claims;
 using ConnectionProject.API.Middleware;
+using ConnectionProject.API.Hubs;
+using ConnectionProject.API.Services;
 using System.Reflection;
 using Microsoft.AspNetCore.Authorization;
 using UniShareProject.API.Authorization; // Ensure this namespace exists for your custom handler
@@ -83,7 +85,7 @@ builder.Services.AddCors(options =>
             )
             .AllowAnyMethod()                    // Allow GET, POST, PUT, DELETE, etc.
             .AllowAnyHeader()                    // Allow any request headers
-            .AllowCredentials()                  // Allow cookies/credentials
+            .AllowCredentials()                  // Allow cookies/credentials - Required for SignalR
             .WithExposedHeaders("Authorization", "Content-Disposition"); // Expose specific headers to client
     });
 
@@ -98,6 +100,14 @@ builder.Services.AddCors(options =>
 
 // Add services to the container.
 builder.Services.AddControllers();
+
+// Add SignalR for real-time messaging
+builder.Services.AddSignalR(options =>
+{
+    options.EnableDetailedErrors = builder.Environment.IsDevelopment();
+    options.KeepAliveInterval = TimeSpan.FromSeconds(15);
+    options.ClientTimeoutInterval = TimeSpan.FromSeconds(30);
+});
 
 // Add HttpContextAccessor for authorization handlers
 builder.Services.AddHttpContextAccessor();
@@ -143,6 +153,9 @@ builder.Services.AddScoped<IItemService, UniShareProject.services.Implementation
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IMessagingService, MessagingService>();
 
+// Real-time notification service
+builder.Services.AddScoped<UniShareProject.services.Interfaces.IRealTimeNotificationService, SignalRNotificationService>();
+
 // File Upload Services - Register based on configuration
 builder.Services.AddScoped<IFileUploadService, UniShareProject.services.Implementations.LocalFileUploadService>();
 
@@ -184,7 +197,16 @@ builder.Services.AddAuthentication(options =>
             var logger = context.HttpContext.RequestServices.GetRequiredService<ILoggerFactory>()
                 .CreateLogger("JwtBearerEvents");
             var authHeader = context.Request.Headers["Authorization"].ToString();
-            if (string.IsNullOrEmpty(authHeader))
+            
+            // Support SignalR token authentication via query parameter
+            var accessToken = context.Request.Query["access_token"];
+            var path = context.HttpContext.Request.Path;
+            if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
+            {
+                context.Token = accessToken;
+                logger.LogInformation("[Auth] SignalR token received via query parameter for {Path}", path);
+            }
+            else if (string.IsNullOrEmpty(authHeader))
             {
                 logger.LogInformation("[Auth] No Authorization header found for {Method} {Path}", context.Request.Method, context.Request.Path);
             }
@@ -556,6 +578,9 @@ app.Use(async (context, next) =>
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Map SignalR hub for real-time messaging
+app.MapHub<MessagingHub>("/hubs/messaging");
 
 // Add a simple root endpoint to show API information
 app.MapGet("/", () => new
