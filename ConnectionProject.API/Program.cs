@@ -69,18 +69,37 @@ builder.Services.Configure<DatabaseSettings>(options =>
 // Add CORS services
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("UniSharePolicy", policy =>
+    // Production policy for Cloudflare Pages deployment
+    options.AddPolicy("ProductionPolicy", policy =>
+    {
+        policy.WithOrigins(
+                // Add your actual Cloudflare Pages domain here
+                "https://unishare.pages.dev",              // Default Cloudflare domain
+                "https://your-project-name.pages.dev",     // Your actual project domain
+                "https://app.unishare.net",                // Custom domain example
+                "https://unishare-app.pages.dev"           // Alternative naming
+            )
+            .AllowAnyMethod()
+            .AllowAnyHeader()
+            .AllowCredentials()
+            .WithExposedHeaders("Authorization", "Content-Disposition", "X-Total-Count");
+    });
+
+    // Development and testing policy
+    options.AddPolicy("DevelopmentPolicy", policy =>
     {
         policy.WithOrigins(
                 "http://localhost:3000",     // React development server
                 "http://localhost:3001",     // Alternative React port
                 "http://localhost:4200",     // Angular development server
-                "http://localhost:5173",     // Vite development server
+                "http://localhost:5173",     // Vite development server (default)
+                "http://localhost:5174",     // Vite alternative port
                 "http://localhost:8080",     // Vue.js development server
                 "https://localhost:3000",    // HTTPS versions
                 "https://localhost:3001",
                 "https://localhost:4200",
                 "https://localhost:5173",
+                "https://localhost:5174",
                 "https://localhost:8080"
             )
             .AllowAnyMethod()                    // Allow GET, POST, PUT, DELETE, etc.
@@ -554,7 +573,7 @@ app.UseStaticFiles(new StaticFileOptions
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 // Enable CORS - Must be placed after UseRouting() if using it, but before UseAuthentication()
-app.UseCors(app.Environment.IsDevelopment() ? "DevelopmentPolicy" : "UniSharePolicy");
+app.UseCors(app.Environment.IsDevelopment() ? "DevelopmentPolicy" : "ProductionPolicy");
 
 app.UseAuthentication();
 
