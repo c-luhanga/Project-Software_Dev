@@ -9,7 +9,7 @@ namespace UniShareProject.services.Models;
 /// </summary>
 /// <param name="Title">Item title (3-255 characters)</param>
 /// <param name="Description">Detailed item description (10-4000 characters)</param>
-/// <param name="CategoryId">Category ID (optional): 1=Books, 2=Electronics, 3=Furniture, 4=Clothing, 5=Other</param>
+/// <param name="CategoryId">Category ID (optional): 1=Electronics, 2=Books, 3=Clothing, 4=Furniture, 5=Sports and Recreation, 6=Other</param>
 /// <param name="Price">Item price in USD (optional, must be >= 0)</param>
 /// <param name="ConditionId">Condition ID (required): 1=Like New, 2=Good, 3=Fair, 4=Poor</param>
 /// <example>
@@ -30,7 +30,7 @@ public record CreateItemRequest(
     [property: Description("Detailed item description (10-4000 characters)")]
     string Description,
 
-    [property: Description("Category ID (optional): 1=Books, 2=Electronics, 3=Furniture, 4=Clothing, 5=Other")]
+    [property: Description("Category ID (optional): 1=Electronics, 2=Books, 3=Clothing, 4=Furniture, 5=Sports and Recreation, 6=Other")]
     int? CategoryId,
 
     [property: Range(0, double.MaxValue)]
@@ -47,7 +47,7 @@ public record CreateItemRequest(
 /// </summary>
 /// <param name="Title">Updated item title (3-100 characters, optional)</param>
 /// <param name="Description">Updated item description (10-4000 characters, optional)</param>
-/// <param name="CategoryId">Updated category ID (optional): 1=Books, 2=Electronics, 3=Furniture, 4=Clothing, 5=Other</param>
+/// <param name="CategoryId">Updated category ID (optional): 1=Electronics, 2=Books, 3=Clothing, 4=Furniture, 5=Sports and Recreation, 6=Other</param>
 /// <param name="Price">Updated item price in USD (optional, must be >= 0)</param>
 /// <param name="ConditionId">Updated condition ID (optional): 1=Like New, 2=Good, 3=Fair, 4=Poor</param>
 /// <example>
@@ -68,7 +68,7 @@ public record UpdateItemRequest(
     [property: Description("Updated detailed item description (10-4000 characters, optional)")]
     string? Description = null,
 
-    [property: Description("Updated category ID (optional): 1=Books, 2=Electronics, 3=Furniture, 4=Clothing, 5=Other")]
+    [property: Description("Updated category ID (optional): 1=Electronics, 2=Books, 3=Clothing, 4=Furniture, 5=Sports and Recreation, 6=Other")]
     int? CategoryId = null,
 
     [property: Range(0, double.MaxValue)]
@@ -108,7 +108,7 @@ public record AddItemImagesRequest(
 /// <param name="Page">Page number (default: 1)</param>
 /// <param name="PageSize">Items per page (default: 20, max: 100)</param>
 public record SearchItemsRequest(
-    [property: Description("Filter by category ID: 1=Books, 2=Electronics, 3=Furniture, 4=Clothing, 5=Other")]
+    [property: Description("Filter by category ID: 1=Electronics, 2=Books, 3=Clothing, 4=Furniture, 5=Sports and Recreation, 6=Other")]
     int? CategoryId = null,
 
     [property: Description("Filter by status ID: 1=Active, 2=Pending, 3=Sold, 4=Withdrawn")]
@@ -159,9 +159,9 @@ public class ItemDto
     public string Description { get; set; } = string.Empty;
 
     /// <summary>
-    /// Category ID: 1=Books, 2=Electronics, 3=Furniture, 4=Clothing, 5=Other
+    /// Category ID: 1=Electronics, 2=Books, 3=Clothing, 4=Furniture, 5=Sports and Recreation, 6=Other
     /// </summary>
-    [Description("Category ID: 1=Books, 2=Electronics, 3=Furniture, 4=Clothing, 5=Other")]
+    [Description("Category ID: 1=Electronics, 2=Books, 3=Clothing, 4=Furniture, 5=Sports and Recreation, 6=Other")]
     public int? CategoryId { get; set; }
 
     /// <summary>

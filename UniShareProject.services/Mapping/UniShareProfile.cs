@@ -22,7 +22,7 @@ public class UniShareProfile : Profile
         CreateMap<Item, ItemDto>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.ItemID))
             .ForMember(dest => dest.CategoryId, opt => opt.MapFrom(src => src.CategoryID))
-            .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => src.Category))
+            .ForMember(dest => dest.CategoryName, opt => opt.MapFrom(src => GetCategoryName(src.CategoryID)))
             .ForMember(dest => dest.ConditionId, opt => opt.MapFrom(src => src.ConditionID))
             .ForMember(dest => dest.StatusId, opt => opt.MapFrom(src => src.StatusID))
             .ForMember(dest => dest.SellerId, opt => opt.MapFrom(src => src.SellerID));
@@ -79,5 +79,24 @@ public class UniShareProfile : Profile
             .ForMember(dest => dest.TotalPages, opt => opt.MapFrom(src => src.TotalPages))
             .ForMember(dest => dest.HasNextPage, opt => opt.MapFrom(src => src.HasNextPage))
             .ForMember(dest => dest.HasPreviousPage, opt => opt.MapFrom(src => src.HasPreviousPage));
+    }
+
+    /// <summary>
+    /// Maps category ID to category name
+    /// </summary>
+    /// <param name="categoryId">Category ID (1=Electronics, 2=Books, 3=Clothing, 4=Furniture, 5=Sports and Recreation, 6=Other)</param>
+    /// <returns>Category name string</returns>
+    private static string? GetCategoryName(int? categoryId)
+    {
+        return categoryId switch
+        {
+            1 => "Electronics",
+            2 => "Books", 
+            3 => "Clothing",
+            4 => "Furniture",
+            5 => "Sports & Recreation",
+            6 => "Other",
+            _ => null
+        };
     }
 }

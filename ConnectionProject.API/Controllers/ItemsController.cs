@@ -85,7 +85,7 @@ public class ItemsController : BaseApiController
     ///        "conditionId": 1
     ///     }
     /// 
-    /// Category IDs: 1=Books, 2=Electronics, 3=Furniture, 4=Clothing, 5=Other
+    /// Category IDs: 1=Electronics, 2=Books, 3=Clothing, 4=Furniture, 5=Sports and Recreation, 6=Other
     /// Condition IDs: 1=Like New, 2=Good, 3=Fair, 4=Poor
     /// 
     /// The seller ID is automatically extracted from the JWT token.
@@ -167,7 +167,7 @@ public class ItemsController : BaseApiController
     /// This endpoint is publicly accessible and does not require authentication.
     /// 
     /// Available filters:
-    /// - categoryId: Filter by category (1=Books, 2=Electronics, 3=Furniture, 4=Clothing, 5=Other)
+    /// - categoryId: Filter by category (1=Electronics, 2=Books, 3=Clothing, 4=Furniture, 5=Sports and Recreation, 6=Other)
     /// - statusId: Filter by status (1=Active, 2=Pending, 3=Sold, 4=Withdrawn)
     /// - conditionId: Filter by condition (1=Like New, 2=Good, 3=Fair, 4=Poor)
     /// - q: Text search in title and description
