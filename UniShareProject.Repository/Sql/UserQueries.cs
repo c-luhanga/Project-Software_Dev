@@ -75,6 +75,39 @@ public static class UserQueries
     public const string GetAdminUsersCount = @"
         SELECT COUNT(1) FROM dbo.Users WHERE IsDeleted = 0 AND IsAdmin = 1";
 
+    /// <summary>
+    /// Gets paginated users with filtering for admin management
+    /// </summary>
+    public const string GetUsersWithPagination = @"
+        SELECT * FROM dbo.Users 
+        WHERE IsDeleted = 0
+        AND (@IncludeAdmins = 1 OR IsAdmin = 0)
+        AND (@IncludeBanned = 1 OR IsBanned = 0)
+        AND (
+            @SearchTerm = '' OR 
+            FirstName LIKE '%' + @SearchTerm + '%' OR 
+            LastName LIKE '%' + @SearchTerm + '%' OR 
+            Email LIKE '%' + @SearchTerm + '%'
+        )
+        ORDER BY UserID
+        OFFSET @Offset ROWS
+        FETCH NEXT @PageSize ROWS ONLY";
+
+    /// <summary>
+    /// Gets total count of users with filtering for admin management
+    /// </summary>
+    public const string GetUsersCount = @"
+        SELECT COUNT(1) FROM dbo.Users 
+        WHERE IsDeleted = 0
+        AND (@IncludeAdmins = 1 OR IsAdmin = 0)
+        AND (@IncludeBanned = 1 OR IsBanned = 0)
+        AND (
+            @SearchTerm = '' OR 
+            FirstName LIKE '%' + @SearchTerm + '%' OR 
+            LastName LIKE '%' + @SearchTerm + '%' OR 
+            Email LIKE '%' + @SearchTerm + '%'
+        )";
+
     #endregion
 
     #region Update Operations

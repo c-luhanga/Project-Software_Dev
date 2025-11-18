@@ -22,6 +22,15 @@ public interface IUserRepository
     Task<int> GetBannedUsersCountAsync(CancellationToken ct);
     Task<int> GetAdminUsersCountAsync(CancellationToken ct);
     
+    // Admin user management methods
+    Task<(IEnumerable<User> Users, int TotalCount)> GetUsersAsync(
+        int page, 
+        int pageSize, 
+        string? searchTerm, 
+        bool includeAdmins, 
+        bool includeBanned, 
+        CancellationToken ct);
+    
     // Legacy methods for backward compatibility with existing services
     Task<User?> GetByIdAsync(int id, IUnitOfWork unitOfWork);
     Task<User?> GetByEmailAsync(string email, IUnitOfWork unitOfWork);

@@ -126,6 +126,49 @@ public class UserRepository : IUserRepository
         );
     }
 
+    // Admin user management methods
+    public async Task<(IEnumerable<User> Users, int TotalCount)> GetUsersAsync(
+        int page, 
+        int pageSize, 
+        string? searchTerm, 
+        bool includeAdmins, 
+        bool includeBanned, 
+        CancellationToken ct)
+    {
+        using var connection = _connectionFactory.CreateConnection();
+        
+        // Calculate offset
+        var offset = (page - 1) * pageSize;
+        
+        // Get paginated users
+        var users = await connection.QueryAsync<User>(
+            UserQueries.GetUsersWithPagination,
+            new 
+            { 
+                SearchTerm = searchTerm ?? string.Empty,
+                IncludeAdmins = includeAdmins,
+                IncludeBanned = includeBanned,
+                Offset = offset,
+                PageSize = pageSize
+            },
+            commandTimeout: 30
+        );
+        
+        // Get total count for the same filters
+        var totalCount = await connection.QuerySingleAsync<int>(
+            UserQueries.GetUsersCount,
+            new 
+            { 
+                SearchTerm = searchTerm ?? string.Empty,
+                IncludeAdmins = includeAdmins,
+                IncludeBanned = includeBanned
+            },
+            commandTimeout: 30
+        );
+        
+        return (users, totalCount);
+    }
+
     // Legacy methods for backward compatibility
     public async Task<User?> GetByIdAsync(int id, IUnitOfWork unitOfWork)
     {

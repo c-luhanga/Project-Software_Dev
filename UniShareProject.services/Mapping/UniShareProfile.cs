@@ -18,6 +18,10 @@ public class UniShareProfile : Profile
             .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserID))
             .ForMember(dest => dest.ProfileImageUrl, opt => opt.MapFrom(src => src.ProfileImageURL));
 
+        CreateMap<User, AdminUserDto>()
+            .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserID))
+            .ForMember(dest => dest.ProfileImageUrl, opt => opt.MapFrom(src => src.ProfileImageURL));
+
         // Item mappings
         CreateMap<Item, ItemDto>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.ItemID))

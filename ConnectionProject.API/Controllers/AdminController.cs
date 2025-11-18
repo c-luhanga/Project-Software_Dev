@@ -69,6 +69,71 @@ public class AdminController : BaseApiController
     }
 
     /// <summary>
+    /// Get paginated list of users for admin management
+    /// </summary>
+    /// <remarks>
+    /// Retrieves a paginated list of users with optional filtering and search capabilities.
+    /// 
+    /// Sample request:
+    /// 
+    ///     GET /api/admin/users?page=1&pageSize=50&includeAdmins=true&includeBanned=true&searchTerm=john
+    ///     Authorization: Bearer {admin_token}
+    /// 
+    /// Query parameters:
+    /// - page: Page number (1-based), default: 1
+    /// - pageSize: Items per page (1-100), default: 50
+    /// - includeAdmins: Include admin users, default: true
+    /// - includeBanned: Include banned users, default: true  
+    /// - searchTerm: Search in first name, last name, or email
+    /// 
+    /// Requires admin role for access.
+    /// </remarks>
+    /// <param name="page">Page number (1-based)</param>
+    /// <param name="pageSize">Number of items per page (1-100)</param>
+    /// <param name="includeAdmins">Whether to include admin users</param>
+    /// <param name="includeBanned">Whether to include banned users</param>
+    /// <param name="searchTerm">Optional search term for filtering users</param>
+    /// <param name="ct">Cancellation token</param>
+    /// <returns>Paginated list of users</returns>
+    /// <response code="200">Users retrieved successfully</response>
+    /// <response code="401">Authentication required</response>
+    /// <response code="403">Admin role required</response>
+    /// <response code="500">Internal server error</response>
+    [HttpGet("users")]
+    [ProducesResponseType(typeof(AdminUsersListDto), 200)]
+    [ProducesResponseType(typeof(object), 401)]
+    [ProducesResponseType(typeof(object), 403)]
+    [ProducesResponseType(typeof(object), 500)]
+    public async Task<IActionResult> GetUsers(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 50,
+        [FromQuery] bool includeAdmins = true,
+        [FromQuery] bool includeBanned = true,
+        [FromQuery] string? searchTerm = null,
+        CancellationToken ct = default)
+    {
+        try
+        {
+            var adminId = GetCurrentUserId();
+            
+            Logger.LogInformation("Admin {AdminId} requesting users list - Page: {Page}, PageSize: {PageSize}, IncludeAdmins: {IncludeAdmins}, IncludeBanned: {IncludeBanned}, SearchTerm: {SearchTerm}", 
+                adminId, page, pageSize, includeAdmins, includeBanned, searchTerm);
+            
+            var usersData = await _userService.GetUsersAsync(page, pageSize, searchTerm, includeAdmins, includeBanned, ct);
+            
+            Logger.LogInformation("Admin {AdminId} retrieved {UserCount} users (Page {Page}/{TotalPages})", 
+                adminId, usersData.Users.Count, usersData.CurrentPage, usersData.TotalPages);
+            
+            return Ok(usersData);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error retrieving users list for admin");
+            return StatusCode(500, new { message = "Internal server error occurred while retrieving users list" });
+        }
+    }
+
+    /// <summary>
     /// Delete an item (Admin operation)
     /// </summary>
     /// <remarks>

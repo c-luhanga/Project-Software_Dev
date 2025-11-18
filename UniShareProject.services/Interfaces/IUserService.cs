@@ -48,4 +48,22 @@ public interface IUserService
     /// <param name="ct">Cancellation token</param>
     /// <returns>Dashboard statistics</returns>
     Task<AdminDashboardDto> GetDashboardAsync(CancellationToken ct);
+
+    /// <summary>
+    /// Get paginated list of users for admin management
+    /// </summary>
+    /// <param name="page">Page number (1-based)</param>
+    /// <param name="pageSize">Number of items per page</param>
+    /// <param name="searchTerm">Optional search term for filtering users</param>
+    /// <param name="includeAdmins">Whether to include admin users in results</param>
+    /// <param name="includeBanned">Whether to include banned users in results</param>
+    /// <param name="ct">Cancellation token</param>
+    /// <returns>Paginated list of users</returns>
+    Task<AdminUsersListDto> GetUsersAsync(
+        int page, 
+        int pageSize, 
+        string? searchTerm, 
+        bool includeAdmins, 
+        bool includeBanned, 
+        CancellationToken ct);
 }

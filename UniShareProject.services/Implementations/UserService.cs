@@ -136,4 +136,41 @@ public class UserService : IUserService
             Status = "Operational"
         };
     }
+
+    public async Task<AdminUsersListDto> GetUsersAsync(
+        int page, 
+        int pageSize, 
+        string? searchTerm, 
+        bool includeAdmins, 
+        bool includeBanned, 
+        CancellationToken ct)
+    {
+        // Validate pagination parameters
+        if (page < 1) page = 1;
+        if (pageSize < 1) pageSize = 10;
+        if (pageSize > 100) pageSize = 100; // Limit to prevent abuse
+
+        // Get users from repository
+        var (users, totalCount) = await _userRepository.GetUsersAsync(
+            page, pageSize, searchTerm, includeAdmins, includeBanned, ct);
+
+        // Map to DTOs
+        var userDtos = users.Select(user => _mapper.Map<AdminUserDto>(user)).ToList();
+
+        // Calculate pagination info
+        var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+        var hasNextPage = page < totalPages;
+        var hasPreviousPage = page > 1;
+
+        return new AdminUsersListDto
+        {
+            Users = userDtos,
+            CurrentPage = page,
+            PageSize = pageSize,
+            TotalUsers = totalCount,
+            TotalPages = totalPages,
+            HasNextPage = hasNextPage,
+            HasPreviousPage = hasPreviousPage
+        };
+    }
 }
