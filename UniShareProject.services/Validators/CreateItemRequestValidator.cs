@@ -28,8 +28,8 @@ public class CreateItemRequestValidator : AbstractValidator<CreateItemRequest>
             .WithMessage("Price must be greater than or equal to 0");
 
         RuleFor(x => x.ConditionId)
-            .InclusiveBetween((byte)1, (byte)4)
-            .WithMessage("ConditionId must be between 1 and 4");
+            .InclusiveBetween((byte)1, (byte)5)
+            .WithMessage("ConditionId must be between 1 and 5");
 
         RuleFor(x => x.CategoryId)
             .GreaterThan(0)

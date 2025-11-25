@@ -195,6 +195,12 @@ public class ItemDto
     public int SellerId { get; set; }
 
     /// <summary>
+    /// Seller's house/dormitory location
+    /// </summary>
+    [Description("Seller's house/dormitory location")]
+    public string? SellerHouse { get; set; }
+
+    /// <summary>
     /// Date and time when item was posted
     /// </summary>
     [Description("Date and time when item was posted")]

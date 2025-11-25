@@ -19,7 +19,9 @@ public class UniShareProfile : Profile
             .ForMember(dest => dest.ProfileImageUrl, opt => opt.MapFrom(src => src.ProfileImageURL));
 
         CreateMap<User, AdminUserDto>()
-            .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.UserID))
+            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.UserID))
+            .ForMember(dest => dest.RegistrationDate, opt => opt.MapFrom(src => src.CreatedAt.ToString("O")))
+            .ForMember(dest => dest.LastLoginDate, opt => opt.MapFrom(src => src.LastSeen.HasValue ? src.LastSeen.Value.ToString("O") : null))
             .ForMember(dest => dest.ProfileImageUrl, opt => opt.MapFrom(src => src.ProfileImageURL));
 
         // Item mappings

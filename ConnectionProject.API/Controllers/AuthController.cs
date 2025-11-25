@@ -134,4 +134,46 @@ public class AuthController : BaseApiController
             return StatusCode(500, new { message = "Internal server error occurred during login" });
         }
     }
+
+    /// <summary>
+    /// Logout user (client-side token invalidation)
+    /// </summary>
+    /// <remarks>
+    /// Logout endpoint for JWT token-based authentication.
+    /// 
+    /// Since JWT tokens are stateless, this endpoint primarily serves as a client-side logout trigger.
+    /// The frontend should discard the token after calling this endpoint.
+    /// 
+    /// Sample request:
+    /// 
+    ///     POST /api/auth/logout
+    ///     Authorization: Bearer {token}
+    /// 
+    /// This endpoint can be extended to implement server-side token blacklisting if needed.
+    /// </remarks>
+    /// <param name="ct">Cancellation token</param>
+    /// <returns>Logout confirmation</returns>
+    /// <response code="200">Logout successful</response>
+    /// <response code="401">Authentication required</response>
+    /// <response code="500">Internal server error</response>
+    [HttpPost("logout")]
+    [Authorize] // Require authentication for logout
+    [ProducesResponseType(typeof(object), 200)]
+    [ProducesResponseType(typeof(object), 401)]
+    [ProducesResponseType(typeof(object), 500)]
+    public async Task<IActionResult> Logout(CancellationToken ct)
+    {
+        try
+        {
+            var userId = GetCurrentUserId();
+            Logger.LogInformation("User {UserId} logged out", userId);
+            
+            return Ok(new { message = "Logout successful" });
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error during logout");
+            return StatusCode(500, new { message = "Internal server error occurred during logout" });
+        }
+    }
 }

@@ -50,20 +50,14 @@ public interface IUserService
     Task<AdminDashboardDto> GetDashboardAsync(CancellationToken ct);
 
     /// <summary>
-    /// Get paginated list of users for admin management
+    /// Get users for admin management with pagination and filtering
     /// </summary>
     /// <param name="page">Page number (1-based)</param>
     /// <param name="pageSize">Number of items per page</param>
-    /// <param name="searchTerm">Optional search term for filtering users</param>
-    /// <param name="includeAdmins">Whether to include admin users in results</param>
-    /// <param name="includeBanned">Whether to include banned users in results</param>
+    /// <param name="searchTerm">Optional search term for name/email</param>
+    /// <param name="includeAdmins">Whether to include admin users</param>
+    /// <param name="includeBanned">Whether to include banned users</param>
     /// <param name="ct">Cancellation token</param>
-    /// <returns>Paginated list of users</returns>
-    Task<AdminUsersListDto> GetUsersAsync(
-        int page, 
-        int pageSize, 
-        string? searchTerm, 
-        bool includeAdmins, 
-        bool includeBanned, 
-        CancellationToken ct);
+    /// <returns>Paginated users list</returns>
+    Task<AdminUsersListDto> GetUsersAsync(int page, int pageSize, string? searchTerm, bool includeAdmins, bool includeBanned, CancellationToken ct);
 }

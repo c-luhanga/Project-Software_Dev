@@ -137,25 +137,26 @@ public class UserService : IUserService
         };
     }
 
-    public async Task<AdminUsersListDto> GetUsersAsync(
-        int page, 
-        int pageSize, 
-        string? searchTerm, 
-        bool includeAdmins, 
-        bool includeBanned, 
-        CancellationToken ct)
+    public async Task<AdminUsersListDto> GetUsersAsync(int page, int pageSize, string? searchTerm, bool includeAdmins, bool includeBanned, CancellationToken ct)
     {
-        // Validate pagination parameters
-        if (page < 1) page = 1;
-        if (pageSize < 1) pageSize = 10;
-        if (pageSize > 100) pageSize = 100; // Limit to prevent abuse
+        // Get users with pagination
+        var (users, totalCount) = await _userRepository.GetUsersAsync(page, pageSize, searchTerm, includeAdmins, includeBanned, ct);
 
-        // Get users from repository
-        var (users, totalCount) = await _userRepository.GetUsersAsync(
-            page, pageSize, searchTerm, includeAdmins, includeBanned, ct);
-
-        // Map to DTOs
-        var userDtos = users.Select(user => _mapper.Map<AdminUserDto>(user)).ToList();
+        // Map users to DTOs
+        var userDtos = users.Select(user => new AdminUserDto
+        {
+            Id = user.UserID,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Email = user.Email,
+            Phone = user.Phone,
+            House = user.House,
+            IsBanned = user.IsBanned,
+            IsAdmin = user.IsAdmin,
+            RegistrationDate = user.CreatedAt.ToString("O"), // ISO 8601 format
+            LastLoginDate = user.LastSeen?.ToString("O"), // ISO 8601 format
+            ProfileImageUrl = user.ProfileImageURL
+        }).ToList();
 
         // Calculate pagination info
         var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);

@@ -69,67 +69,80 @@ public class AdminController : BaseApiController
     }
 
     /// <summary>
-    /// Get paginated list of users for admin management
+    /// Get users for admin management
     /// </summary>
     /// <remarks>
-    /// Retrieves a paginated list of users with optional filtering and search capabilities.
+    /// Retrieves a paginated list of users with filtering options for admin management.
     /// 
     /// Sample request:
     /// 
-    ///     GET /api/admin/users?page=1&pageSize=50&includeAdmins=true&includeBanned=true&searchTerm=john
+    ///     GET /api/admin/users?page=1&amp;pageSize=50&amp;includeAdmins=true&amp;includeBanned=true
     ///     Authorization: Bearer {admin_token}
     /// 
     /// Query parameters:
-    /// - page: Page number (1-based), default: 1
-    /// - pageSize: Items per page (1-100), default: 50
-    /// - includeAdmins: Include admin users, default: true
-    /// - includeBanned: Include banned users, default: true  
-    /// - searchTerm: Search in first name, last name, or email
+    /// - page: Page number (1-based, default: 1)
+    /// - pageSize: Items per page (default: 50, max: 100)
+    /// - searchTerm: Search by name or email (optional)
+    /// - includeAdmins: Include admin users (default: true)
+    /// - includeBanned: Include banned users (default: true)
     /// 
     /// Requires admin role for access.
     /// </remarks>
     /// <param name="page">Page number (1-based)</param>
-    /// <param name="pageSize">Number of items per page (1-100)</param>
+    /// <param name="pageSize">Number of items per page</param>
+    /// <param name="searchTerm">Search term for name or email</param>
     /// <param name="includeAdmins">Whether to include admin users</param>
     /// <param name="includeBanned">Whether to include banned users</param>
-    /// <param name="searchTerm">Optional search term for filtering users</param>
     /// <param name="ct">Cancellation token</param>
-    /// <returns>Paginated list of users</returns>
+    /// <returns>Paginated users list</returns>
     /// <response code="200">Users retrieved successfully</response>
+    /// <response code="400">Invalid parameters</response>
     /// <response code="401">Authentication required</response>
     /// <response code="403">Admin role required</response>
     /// <response code="500">Internal server error</response>
     [HttpGet("users")]
     [ProducesResponseType(typeof(AdminUsersListDto), 200)]
+    [ProducesResponseType(typeof(object), 400)]
     [ProducesResponseType(typeof(object), 401)]
     [ProducesResponseType(typeof(object), 403)]
     [ProducesResponseType(typeof(object), 500)]
     public async Task<IActionResult> GetUsers(
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 50,
+        [FromQuery] string? searchTerm = null,
         [FromQuery] bool includeAdmins = true,
         [FromQuery] bool includeBanned = true,
-        [FromQuery] string? searchTerm = null,
         CancellationToken ct = default)
     {
         try
         {
             var adminId = GetCurrentUserId();
             
-            Logger.LogInformation("Admin {AdminId} requesting users list - Page: {Page}, PageSize: {PageSize}, IncludeAdmins: {IncludeAdmins}, IncludeBanned: {IncludeBanned}, SearchTerm: {SearchTerm}", 
-                adminId, page, pageSize, includeAdmins, includeBanned, searchTerm);
+            // Validate parameters
+            if (page < 1)
+            {
+                return BadRequest(new { message = "Page must be greater than 0" });
+            }
+            
+            if (pageSize < 1 || pageSize > 100)
+            {
+                return BadRequest(new { message = "PageSize must be between 1 and 100" });
+            }
+
+            Logger.LogInformation("Admin {AdminId} requesting users list - Page: {Page}, PageSize: {PageSize}, SearchTerm: {SearchTerm}", 
+                adminId, page, pageSize, searchTerm ?? "None");
             
             var usersData = await _userService.GetUsersAsync(page, pageSize, searchTerm, includeAdmins, includeBanned, ct);
             
-            Logger.LogInformation("Admin {AdminId} retrieved {UserCount} users (Page {Page}/{TotalPages})", 
-                adminId, usersData.Users.Count, usersData.CurrentPage, usersData.TotalPages);
+            Logger.LogInformation("Retrieved {UserCount} users out of {TotalUsers} for admin {AdminId}", 
+                usersData.Users.Count, usersData.TotalUsers, adminId);
             
             return Ok(usersData);
         }
         catch (Exception ex)
         {
-            Logger.LogError(ex, "Error retrieving users list for admin");
-            return StatusCode(500, new { message = "Internal server error occurred while retrieving users list" });
+            Logger.LogError(ex, "Error retrieving users list");
+            return StatusCode(500, new { message = "Internal server error occurred while retrieving users" });
         }
     }
 

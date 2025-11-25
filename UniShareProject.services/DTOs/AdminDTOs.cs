@@ -77,7 +77,7 @@ public record AdminUserDto
     /// User's unique identifier
     /// </summary>
     [Description("User's unique identifier")]
-    public int UserId { get; init; }
+    public int Id { get; init; }
 
     /// <summary>
     /// User's first name
@@ -122,16 +122,16 @@ public record AdminUserDto
     public bool IsAdmin { get; init; }
 
     /// <summary>
-    /// When the user was created
+    /// When the user registered
     /// </summary>
-    [Description("When the user was created")]
-    public DateTime CreatedAt { get; init; }
+    [Description("When the user registered")]
+    public string RegistrationDate { get; init; } = string.Empty;
 
     /// <summary>
     /// When the user was last seen (optional)
     /// </summary>
     [Description("When the user was last seen (optional)")]
-    public DateTime? LastSeen { get; init; }
+    public string? LastLoginDate { get; init; }
 
     /// <summary>
     /// URL to user's profile image (optional)
