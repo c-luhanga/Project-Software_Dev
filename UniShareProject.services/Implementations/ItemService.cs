@@ -11,17 +11,20 @@ public class ItemService : IItemService
 {
     private readonly IItemRepository _itemRepository;
     private readonly IItemImageRepository _itemImageRepository;
+    private readonly IUserRepository _userRepository;
     private readonly IUnitOfWorkFactory _unitOfWorkFactory;
     private readonly IMapper _mapper;
 
     public ItemService(
         IItemRepository itemRepository,
         IItemImageRepository itemImageRepository,
+        IUserRepository userRepository,
         IUnitOfWorkFactory unitOfWorkFactory,
         IMapper mapper)
     {
         _itemRepository = itemRepository;
         _itemImageRepository = itemImageRepository;
+        _userRepository = userRepository;
         _unitOfWorkFactory = unitOfWorkFactory;
         _mapper = mapper;
     }
@@ -94,6 +97,13 @@ public class ItemService : IItemService
         var imageUrls = await _itemImageRepository.GetUrlsAsync(id, ct);
         itemDto.Images = imageUrls.ToList();
 
+        // Load seller's house information
+        var seller = await _userRepository.GetByIdAsync(item.SellerID, ct);
+        if (seller != null)
+        {
+            itemDto.SellerHouse = seller.House;
+        }
+
         return itemDto;
     }
 
@@ -110,11 +120,19 @@ public class ItemService : IItemService
         
         var itemDtos = _mapper.Map<IEnumerable<ItemDto>>(pagedResult.Items).ToList();
         
-        // Load images for each item (including thumbnails)
+        // Load images and seller house for each item
         foreach (var itemDto in itemDtos)
         {
+            // Load images
             var imageUrls = await _itemImageRepository.GetUrlsAsync(itemDto.Id, ct);
             itemDto.Images = imageUrls.ToList();
+            
+            // Load seller's house information
+            var seller = await _userRepository.GetByIdAsync(itemDto.SellerId, ct);
+            if (seller != null)
+            {
+                itemDto.SellerHouse = seller.House;
+            }
         }
         
         return new PagedResultDto<ItemDto>(
