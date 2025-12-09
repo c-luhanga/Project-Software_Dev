@@ -56,10 +56,13 @@ public class UserRepository : IUserRepository
     public async Task<int> UpdateProfileAsync(int userId, string? phone, string? house, string? profileImageUrl, CancellationToken ct)
     {
         using var connection = _connectionFactory.CreateConnection();
+        
+        // Service layer now ensures we always have the correct values (preserved or updated)
+        // So we can safely update all three fields
         var rowsAffected = await connection.ExecuteScalarAsync<int>(
-            UserQueries.UpdateProfile,
-            new { userId, phone, house, profileImageUrl },
-            commandTimeout: 30
+          UserQueries.UpdateProfile,
+          new { userId, phone, house, profileImageUrl },
+           commandTimeout: 30
         );
         return rowsAffected;
     }

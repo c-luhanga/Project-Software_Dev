@@ -32,6 +32,18 @@ public class ItemService : IItemService
     // New required methods
     public async Task<ItemDto> CreateAsync(CreateItemRequest req, int sellerId, CancellationToken ct)
     {
+        // Validate category exists (1=Books, 2=Electronics, 3=Furniture, 4=Clothing, 5=Sports, 6=Other)
+        if (req.CategoryId < 1 || req.CategoryId > 6)
+        {
+            throw new ArgumentException($"Invalid category ID {req.CategoryId}. Valid categories are 1 (Books), 2 (Electronics), 3 (Furniture), 4 (Clothing), 5 (Sports & Recreation), or 6 (Other).");
+        }
+
+        // Validate condition exists (1=Like New, 2=Good, 3=Fair, 4=Poor)
+        if (req.ConditionId < 1 || req.ConditionId > 4)
+        {
+            throw new ArgumentException($"Invalid condition ID {req.ConditionId}. Valid conditions are 1 (Like New), 2 (Good), 3 (Fair), or 4 (Poor).");
+        }
+        
         var item = _mapper.Map<Item>(req);
         item.SellerID = sellerId;
         item.StatusID = 1; // Active status
@@ -97,10 +109,12 @@ public class ItemService : IItemService
         var imageUrls = await _itemImageRepository.GetUrlsAsync(id, ct);
         itemDto.Images = imageUrls.ToList();
 
-        // Load seller's house information
+        // Load seller information (name, house, profile image)
         var seller = await _userRepository.GetByIdAsync(item.SellerID, ct);
         if (seller != null)
         {
+            itemDto.SellerName = $"{seller.FirstName} {seller.LastName}";
+            itemDto.SellerProfileImageUrl = seller.ProfileImageURL;
             itemDto.SellerHouse = seller.House;
         }
 
@@ -109,40 +123,42 @@ public class ItemService : IItemService
 
     public async Task<PagedResultDto<ItemDto>> SearchAsync(SearchItemsRequest req, CancellationToken ct)
     {
-        var pageSpec = req.ToPageSpec();
-        var pagedResult = await _itemRepository.SearchAsync(
-            req.CategoryId, 
-            req.StatusId, 
-            req.ConditionId, 
-            req.Q, 
+      var pageSpec = req.ToPageSpec();
+     var pagedResult = await _itemRepository.SearchAsync(
+   req.CategoryId, 
+  req.StatusId, 
+   req.ConditionId, 
+          req.Q, 
             pageSpec, 
             ct);
         
         var itemDtos = _mapper.Map<IEnumerable<ItemDto>>(pagedResult.Items).ToList();
         
-        // Load images and seller house for each item
-        foreach (var itemDto in itemDtos)
+        // Load images and seller information for each item
+  foreach (var itemDto in itemDtos)
         {
-            // Load images
-            var imageUrls = await _itemImageRepository.GetUrlsAsync(itemDto.Id, ct);
+ // Load images
+  var imageUrls = await _itemImageRepository.GetUrlsAsync(itemDto.Id, ct);
             itemDto.Images = imageUrls.ToList();
-            
-            // Load seller's house information
+    
+         // Load seller information (name, house, profile image)
             var seller = await _userRepository.GetByIdAsync(itemDto.SellerId, ct);
-            if (seller != null)
+          if (seller != null)
             {
-                itemDto.SellerHouse = seller.House;
+   itemDto.SellerName = $"{seller.FirstName} {seller.LastName}";
+           itemDto.SellerProfileImageUrl = seller.ProfileImageURL;
+           itemDto.SellerHouse = seller.House;
             }
-        }
-        
+  }
+      
         return new PagedResultDto<ItemDto>(
-            itemDtos,
-            pagedResult.Total,
-            pagedResult.Page,
+itemDtos,
+pagedResult.Total,
+     pagedResult.Page,
             pagedResult.PageSize,
-            pagedResult.TotalPages,
-            pagedResult.HasNextPage,
-            pagedResult.HasPreviousPage
+      pagedResult.TotalPages,
+        pagedResult.HasNextPage,
+     pagedResult.HasPreviousPage
         );
     }
 
@@ -309,18 +325,30 @@ public class ItemService : IItemService
     {
         // Use the new repository method that supports CancellationToken
         // Get user items from repository
-        await using var unitOfWork = _unitOfWorkFactory.Create();
+     await using var unitOfWork = _unitOfWorkFactory.Create();
         var items = await _itemRepository.GetByUserIdAsync(userId, unitOfWork);
-        
+   
         // Map entities to DTOs using AutoMapper
         var itemDtos = items.Select(item => _mapper.Map<ItemDto>(item)).ToList();
+     
+        // Load seller information once for the current user (all items have same seller)
+        var seller = await _userRepository.GetByIdAsync(userId, ct);
         
-        // Load images for each item
-        foreach (var itemDto in itemDtos)
-        {
+        // Load images and populate seller info for each item
+      foreach (var itemDto in itemDtos)
+  {
+     // Load images
             var imageUrls = await _itemImageRepository.GetUrlsAsync(itemDto.Id, ct);
-            itemDto.Images = imageUrls.ToList();
-        }
+       itemDto.Images = imageUrls.ToList();
+       
+            // Populate seller information (all items belong to the same user)
+         if (seller != null)
+  {
+     itemDto.SellerName = $"{seller.FirstName} {seller.LastName}";
+      itemDto.SellerProfileImageUrl = seller.ProfileImageURL;
+      itemDto.SellerHouse = seller.House;
+            }
+      }
         
         return itemDtos;
     }

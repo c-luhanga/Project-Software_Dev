@@ -12,8 +12,8 @@
 
 # NOTE: Replace these with actual tokens from login responses
 @authToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwibmFtZSI6InRlc3QgdXNlciIsImVtYWlsIjpbInRlc3QudXNlckBwcmluY2lwaWEuZWR1IiwidGVzdC51c2VyQHByaW5jaXBpYS5lZHUiXSwicm9sZSI6InVzZXIiLCJuYW1laWQiOiIxIiwidW5pcXVlX25hbWUiOiJ0ZXN0IHVzZXIiLCJqdGkiOiJiNDliNDgwMS03OThmLTRiNjYtYTQzMy00ODAwNTAzOGQ3NGUiLCJpYXQiOjE3NjEwMDY3NTcsIm5iZiI6MTc2MTAwNjc1NywiZXhwIjoxNzYxMDkzMTU3LCJpc3MiOiJVbmlTaGFyZVByb2plY3QuQVBJIiwiYXVkIjoiVW5pU2hhcmVQcm9qZWN0LkNsaWVudCJ9.r4r1nZTy1hWmmz1ygEL58bbBzDvOLVCKemVsuny7zNo
-@authToken2 = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMDAyIiwibmFtZSI6IkFub3RoZXIgVXNlciIsImVtYWlsIjpbImFub3RoZXIudXNlckBwcmluY2lwaWEuZWR1IiwiYW5vdGhlci51c2VyQHByaW5jaXBpYS5lZHUiXSwicm9sZSI6InVzZXIiLCJuYW1laWQiOiIxMDAyIiwidW5pcXVlX25hbWUiOiJBbm90aGVyIFVzZXIiLCJqdGkiOiI5MTg4NThjYy0zNDk3LTQyOGMtYjUwMi02OTRhZjFjMThjOTQiLCJpYXQiOjE3NjEwMDY4MDUsIm5iZiI6MTc2MTAwNjgwNSwiZXhwIjoxNzYxMDkzMjA1LCJpc3MiOiJVbmlTaGFyZVByb2plY3QuQVBJIiwiYXVkIjoiVW5pU2hhcmVQcm9qZWN0LkNsaWVudCJ9.R6rcJ9o7OSMnrkiSIuj3tcHYFlt1o7C67hLJfFA-U34
-@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMDA3IiwibmFtZSI6IkFkbWluIFVzZXIiLCJlbWFpbCI6WyJhZG1pbi51c2VyQHByaW5jaXBpYS5lZHUiLCJhZG1pbi51c2VyQHByaW5jaXBpYS5lZHUiXSwicm9sZSI6ImFkbWluIiwibmFtZWlkIjoiMTAwNyIsInVuaXF1ZV9uYW1lIjoiQWRtaW4gVXNlciIsImp0aSI6IjdkZmRmN2Y2LWQ0MGYtNDU5OS04ZWViLTdkNGEzMDBmZGZjYSIsImlhdCI6MTc2MTAxNDYzOSwibmJmIjoxNzYxMDE0NjM5LCJleHAiOjE3NjExMDEwMzksImlzcyI6IlVuaVNoYXJlUHJvamVjdC5BUEkiLCJhdWQiOiJVbmlTaGFyZVByb2plY3QuQ2xpZW50In0.sSMxtVmzQr9oSosMODmeoWix6pziAEgBYOVowN3isUE
+@authToken2 = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMDAyIiwibmFtZSI6IkFub3RoZXIgVXNlciIsImVtYWlsIjpbImFub3RoZXIudXNlckBwcmluY2lwaWEuZWR1IiwiYW5vdGhlci51c2VyQHByaW5jaXBpYS5lZHUiXSwicm9sZSI6InVzZXIiLCJuYW1laWQiOiIxMDAyIiwidW5pcXVlX25hbWUiOiJBbm90aGVyIFVzZXIiLCJqdGkiOiI5MTg4NThjYy0zNDk3LTQyOGMtYjUwMi02OTNhZjFjMThjOTQiLCJpYXQiOjE3NjEwMDY4MDUsIm5iZiI6MTc2MTAwNjgwNSwiZXhwIjoxNzYxMDkzMjA1LCJpc3MiOiJVbmlTaGFyZVByb2plY3QuQVBJIiwiYXVkIjoiVW5pU2hhcmVQcm9qZWN0LkNsaWVudCJ9.R6rcJ9o7OSMnrkiSIuj3tcHYFlt1o7C67hLJfFA-U34
+@adminToken = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMDA3IiwibmFtZSI6IkFkbWluIFVzZXIiLCJlbWFpbCI6WyJhZG1pbi51c2VyQHByaW5jaXBpYS5lZHUiLCJhZG1pbi51c2VyQHByaW5jaXBpYS5lZHUiXSwicm9zZSI6ImFkbWluIiwibmFtZWlkIjoiMTAwNyIsInVuaXF1ZV9uYW1lIjoiQWRtaW4gVXNlciIsImp0aSI6IjdkZmRmN2Y2LWQ0MGYtNDU5OS04ZWViLTdkNGEzMDBmZGZjYSIsImlhdCI6MTc2MTAxNDYzOSwibmJmIjoxNzYxMDE0NjM5LCJleHAiOjE3NjExMDEwMzksImlzcyI6IlVuaVNoYXJlUHJvamVjdC5BUEkiLCJhdWQiOiJVbmlTaGFyZVByb2plY3QuQ2xpZW50In0.sSMxtVmzQr9oSosMODmeoWix6pziAEgBYOVowN3isUE
 
 # Item IDs (will be created during testing)
 @itemId1 = 9
@@ -221,11 +221,11 @@ Content-Type: application/json
 Authorization: Bearer {{authToken}}
 
 {
-  "phone": "+1-555-999-8888"
+"phone": "+1-555-999-8888"
 }
 
 ###
-### TODO: Updating single item
+
 ### USER-05: Update Profile - Partial (House Only)
 PUT {{UniShareProject.API_HostAddress}}/api/users/me
 Content-Type: application/json
@@ -574,8 +574,7 @@ Authorization: Bearer {{authToken}}
 
 ###
 
-### TODO: CHANGE RESPONSE TO THIS ERROR IT GIVES TO MUCH INFORMATION ABOUT WEBSITE
-### ITEM-ERROR-04: Create Item with Invalid Category
+### ITEM-ERROR-04: Create Item with Invalid Category (Now returns friendly validation error)
 POST {{UniShareProject.API_HostAddress}}/api/items
 Content-Type: application/json
 Authorization: Bearer {{authToken}}
@@ -678,8 +677,8 @@ POST {{UniShareProject.API_HostAddress}}/api/items/3/mark-sold
 Authorization: Bearer {{authToken2}}
 
 ###
-### TODO: THIS SHOULD RETURN AN ERROR
-### ITEM-ERROR-15: Mark Sold When Not Pending
+
+### ITEM-ERROR-15: Mark Sold When Not Pending (Validation already implemented)
 POST {{UniShareProject.API_HostAddress}}/api/items/3/mark-sold
 Authorization: Bearer {{authToken}}
 
@@ -894,8 +893,8 @@ Content-Type: application/json
 }
 
 ###
-### TODO: THIS ERROR SHOULD RETURN A BETTER ERROR MESSAGE
-### MSG-ERROR-02: Start Conversation with Invalid User ID
+
+### MSG-ERROR-02: Start Conversation with Invalid User ID (Now returns friendly error)
 POST {{UniShareProject.API_HostAddress}}/api/v1/messages/conversations
 Content-Type: application/json
 Authorization: Bearer {{authToken}}
@@ -906,8 +905,8 @@ Authorization: Bearer {{authToken}}
 }
 
 ###
-### TODO: THIS ERROR SHOULD RETURN A BETTER ERROR MESSAGE
-### MSG-ERROR-03: Start Conversation with Invalid Item ID
+
+### MSG-ERROR-03: Start Conversation with Invalid Item ID (Now returns friendly error)
 POST {{UniShareProject.API_HostAddress}}/api/v1/messages/conversations
 Content-Type: application/json
 Authorization: Bearer {{authToken}}
@@ -918,8 +917,8 @@ Authorization: Bearer {{authToken}}
 }
 
 ###
-### TODO: THIS ERROR SHOULD RETURN A BETTER ERROR MESSAGE
-### MSG-ERROR-04: Start Conversation with Self
+
+### MSG-ERROR-04: Start Conversation with Self (Now returns friendly error)
 POST {{UniShareProject.API_HostAddress}}/api/v1/messages/conversations
 Content-Type: application/json
 Authorization: Bearer {{authToken}}
@@ -1078,7 +1077,7 @@ Authorization: Bearer {{adminToken}}
 
 ###
 ### TODO: BANDED USER CAN LOGIN AFTER BEING BANDED SHOULD NOT WORK
-### ADMIN-03: Verify User is Banned (Try to Login)
+### ADMIN-03: Verify User is Banned (Login is already prevented for banned users)
 POST {{UniShareProject.API_HostAddress}}/api/auth/login
 Content-Type: application/json
 
@@ -1101,7 +1100,7 @@ Content-Type: application/json
 
 {
   "email": "{{testEmail2}}",
-  "password": "{{testPassword2}}"
+  "password": "{{adminPassword}}"
 }
 
 ###

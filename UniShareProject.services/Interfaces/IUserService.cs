@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using UniShareProject.services.DTOs;
 
 namespace UniShareProject.services.Interfaces;
@@ -60,4 +61,13 @@ public interface IUserService
     /// <param name="ct">Cancellation token</param>
     /// <returns>Paginated users list</returns>
     Task<AdminUsersListDto> GetUsersAsync(int page, int pageSize, string? searchTerm, bool includeAdmins, bool includeBanned, CancellationToken ct);
+
+    /// <summary>
+    /// Upload a profile image for the specified user and return the public URL
+    /// </summary>
+    /// <param name="userId">ID of the user uploading the image</param>
+    /// <param name="file">Image file</param>
+    /// <param name="ct">Cancellation token</param>
+    /// <returns>Public URL of uploaded profile image</returns>
+    Task<string> UploadProfileImageAsync(int userId, IFormFile file, CancellationToken ct);
 }

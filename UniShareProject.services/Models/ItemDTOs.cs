@@ -195,6 +195,18 @@ public class ItemDto
     public int SellerId { get; set; }
 
     /// <summary>
+    /// Seller's full name (first + last name)
+    /// </summary>
+    [Description("Seller's full name (first + last name)")]
+    public string? SellerName { get; set; }
+
+    /// <summary>
+    /// Seller's profile image URL
+    /// </summary>
+    [Description("Seller's profile image URL")]
+    public string? SellerProfileImageUrl { get; set; }
+
+    /// <summary>
     /// Seller's house/dormitory location
     /// </summary>
     [Description("Seller's house/dormitory location")]

@@ -16,6 +16,8 @@ public class MessagingService : IMessagingService
     private readonly UniShareProject.Repository.Abstractions.IConversationRepository _conversationRepository;
     private readonly UniShareProject.Repository.Abstractions.IMessageRepository _messageRepository;
     private readonly UniShareProject.Repository.Repositories.IMessageRepository _legacyMessageRepository;
+    private readonly IUserRepository _userRepository;
+    private readonly IItemRepository _itemRepository;
     private readonly IUnitOfWorkFactory _unitOfWorkFactory;
     private readonly IMapper _mapper;
     private readonly ILogger<MessagingService> _logger;
@@ -25,6 +27,8 @@ public class MessagingService : IMessagingService
         UniShareProject.Repository.Abstractions.IConversationRepository conversationRepository,
         UniShareProject.Repository.Abstractions.IMessageRepository messageRepository,
         UniShareProject.Repository.Repositories.IMessageRepository legacyMessageRepository,
+        IUserRepository userRepository,
+        IItemRepository itemRepository,
         IUnitOfWorkFactory unitOfWorkFactory,
         IMapper mapper,
         ILogger<MessagingService> logger,
@@ -33,6 +37,8 @@ public class MessagingService : IMessagingService
         _conversationRepository = conversationRepository;
         _messageRepository = messageRepository;
         _legacyMessageRepository = legacyMessageRepository;
+        _userRepository = userRepository;
+        _itemRepository = itemRepository;
         _unitOfWorkFactory = unitOfWorkFactory;
         _mapper = mapper;
         _logger = logger;
@@ -41,6 +47,29 @@ public class MessagingService : IMessagingService
 
     public async Task<int> StartConversationAsync(StartConversationRequest req, int starterUserId, CancellationToken ct)
     {
+        // Validation 1: Check if trying to message self
+        if (req.OtherUserId == starterUserId)
+        {
+            throw new ArgumentException("You cannot start a conversation with yourself.");
+        }
+
+        // Validation 2: Check if other user exists
+        var otherUserExists = await _userRepository.UserExistsAsync(req.OtherUserId, ct);
+        if (!otherUserExists)
+        {
+            throw new ArgumentException($"Cannot start conversation. User with ID {req.OtherUserId} not found.");
+        }
+
+        // Validation 3: Check if item exists (if itemId provided)
+        if (req.ItemId.HasValue)
+        {
+            var item = await _itemRepository.GetByIdAsync(req.ItemId.Value, ct);
+            if (item == null)
+            {
+                throw new ArgumentException($"Cannot start conversation about item. Item with ID {req.ItemId.Value} not found.");
+            }
+        }
+
         await using var unitOfWork = _unitOfWorkFactory.Create();
         
         try
@@ -64,6 +93,17 @@ public class MessagingService : IMessagingService
 
     public async Task<MessageDto> SendAsync(SendMessageRequest req, int senderId, CancellationToken ct)
     {
+        // Validate message content
+        if (string.IsNullOrWhiteSpace(req.Content))
+        {
+            throw new ArgumentException("Message content cannot be empty.");
+        }
+
+        if (req.Content.Length > 4000)
+        {
+            throw new ArgumentException($"Message content exceeds maximum length of 4000 characters. Your message is {req.Content.Length} characters long.");
+        }
+
         await using var unitOfWork = _unitOfWorkFactory.Create();
         
         try
@@ -72,7 +112,7 @@ public class MessagingService : IMessagingService
             var isParticipant = await _conversationRepository.UserIsParticipantAsync(req.ConversationId, senderId, ct);
             if (!isParticipant)
             {
-                throw new UnauthorizedAccessException("User is not a participant in this conversation.");
+                throw new UnauthorizedAccessException("You are not a participant in this conversation.");
             }
 
             // Create message object
@@ -133,7 +173,7 @@ public class MessagingService : IMessagingService
         var isParticipant = await _conversationRepository.UserIsParticipantAsync(conversationId, userId, ct);
         if (!isParticipant)
         {
-            throw new UnauthorizedAccessException("User is not a participant in this conversation.");
+            throw new UnauthorizedAccessException("You are not a participant in this conversation.");
         }
 
         // Fetch paged messages from repository

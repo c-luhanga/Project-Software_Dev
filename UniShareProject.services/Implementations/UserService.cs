@@ -1,5 +1,6 @@
 using AutoMapper;
 using FluentValidation;
+using Microsoft.AspNetCore.Http;
 using UniShareProject.Repository.Repositories;
 using UniShareProject.services.DTOs;
 using UniShareProject.services.Interfaces;
@@ -15,17 +16,20 @@ public class UserService : IUserService
     private readonly IItemRepository _itemRepository;
     private readonly IMapper _mapper;
     private readonly IValidator<UpdateMeRequest> _updateMeValidator;
+    private readonly IFileUploadService _fileUploadService;
 
     public UserService(
         IUserRepository userRepository,
         IItemRepository itemRepository,
         IMapper mapper,
-        IValidator<UpdateMeRequest> updateMeValidator)
+        IValidator<UpdateMeRequest> updateMeValidator,
+        IFileUploadService fileUploadService)
     {
         _userRepository = userRepository;
         _itemRepository = itemRepository;
         _mapper = mapper;
         _updateMeValidator = updateMeValidator;
+        _fileUploadService = fileUploadService;
     }
 
     public async Task<UserDto?> GetMeAsync(int userId, CancellationToken ct)
@@ -47,12 +51,75 @@ public class UserService : IUserService
             throw new ValidationException($"Validation failed: {errors}");
         }
 
-        // Update profile
+        // Fetch current user to get existing values
+        var currentUser = await _userRepository.GetByIdAsync(userId, ct);
+        if (currentUser is null)
+        {
+            throw new InvalidOperationException($"User with ID {userId} not found");
+        }
+
+        // Determine what to update:
+        // - null in request = keep existing value (field not provided)
+        // - empty string in request = clear the field (set to null in database)
+        // - non-empty string in request = update to new value
+        
+        string? phoneToUpdate;
+        if (req.Phone == null)
+        {
+            // Not provided, keep existing
+            phoneToUpdate = currentUser.Phone;
+        }
+        else if (string.IsNullOrWhiteSpace(req.Phone))
+        {
+            // Empty string = clear field
+            phoneToUpdate = null;
+        }
+        else
+        {
+            // Actual value provided
+            phoneToUpdate = req.Phone;
+        }
+
+        string? houseToUpdate;
+        if (req.House == null)
+        {
+            // Not provided, keep existing
+            houseToUpdate = currentUser.House;
+        }
+        else if (string.IsNullOrWhiteSpace(req.House))
+        {
+            // Empty string = clear field
+            houseToUpdate = null;
+        }
+        else
+        {
+            // Actual value provided
+            houseToUpdate = req.House;
+        }
+
+        string? profileImageUrlToUpdate;
+        if (req.ProfileImageUrl == null)
+        {
+            // Not provided, keep existing
+            profileImageUrlToUpdate = currentUser.ProfileImageURL;
+        }
+        else if (string.IsNullOrWhiteSpace(req.ProfileImageUrl))
+        {
+            // Empty string = clear field
+            profileImageUrlToUpdate = null;
+        }
+        else
+        {
+            // Actual value provided
+            profileImageUrlToUpdate = req.ProfileImageUrl;
+        }
+
+        // Update profile with resolved values
         var rowsAffected = await _userRepository.UpdateProfileAsync(
             userId,
-            req.Phone,
-            req.House,
-            req.ProfileImageUrl,
+            phoneToUpdate,
+            houseToUpdate,
+            profileImageUrlToUpdate,
             ct);
 
         if (rowsAffected == 0)
@@ -173,5 +240,30 @@ public class UserService : IUserService
             HasNextPage = hasNextPage,
             HasPreviousPage = hasPreviousPage
         };
+    }
+
+    public async Task<string> UploadProfileImageAsync(int userId, IFormFile file, CancellationToken ct)
+    {
+        if (file is null)
+        {
+            throw new ValidationException("No file provided");
+        }
+
+        if (!_fileUploadService.IsValidImageFile(file))
+        {
+            throw new ValidationException("Invalid image file format or size");
+        }
+
+        // Use itemId = 0 to categorize profile images separately in storage
+        var url = await _fileUploadService.UploadImageAsync(file, 0, ct);
+
+        // Persist the profile image URL to the user's record
+        var rowsAffected = await _userRepository.UpdateProfileAsync(userId, null, null, url, ct);
+        if (rowsAffected == 0)
+        {
+            throw new InvalidOperationException($"User with ID {userId} not found or could not be updated");
+        }
+
+        return url;
     }
 }

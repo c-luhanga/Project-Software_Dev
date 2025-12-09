@@ -23,6 +23,48 @@ public class UsersController : BaseApiController
     }
 
     /// <summary>
+    /// Upload a profile image for the current authenticated user
+    /// </summary>
+    /// <param name="file">Image file sent as multipart/form-data</param>
+    /// <param name="ct">Cancellation token</param>
+    /// <returns>JSON object containing the public URL</returns>
+    [HttpPost("me/upload-profile-image")]
+    [Consumes("multipart/form-data")]
+    [ProducesResponseType(typeof(object), 200)]
+    [ProducesResponseType(typeof(object), 400)]
+    [ProducesResponseType(typeof(object), 401)]
+    [ProducesResponseType(typeof(object), 500)]
+    public async Task<ActionResult> UploadProfileImage(IFormFile file, CancellationToken ct)
+    {
+        if (file is null)
+        {
+            return BadRequest(new { message = "No file was provided" });
+        }
+
+        try
+        {
+            var userId = GetCurrentUserId();
+            var url = await _service.UploadProfileImageAsync(userId, file, ct);
+            return Ok(new { url });
+        }
+        catch (FluentValidation.ValidationException ex)
+        {
+            Logger.LogWarning(ex, "Profile image validation failed: {Message}", ex.Message);
+            return BadRequest(new { message = ex.Message });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            Logger.LogWarning(ex, "Unauthorized upload attempt: {Message}", ex.Message);
+            return Unauthorized(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Error uploading profile image");
+            return StatusCode(500, new { message = "Internal server error occurred" });
+        }
+    }
+
+    /// <summary>
     /// Get the current authenticated user's profile
     /// </summary>
     /// <remarks>
